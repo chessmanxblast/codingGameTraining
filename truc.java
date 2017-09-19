@@ -1,4 +1,4 @@
 print("Hello world");
-print("hal")
-print("git is dumb")
+print("git")
+print("hal is dumb")
 print ("ly");
