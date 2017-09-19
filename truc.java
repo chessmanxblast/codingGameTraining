@@ -1,1 +1,3 @@
-Hal
+print("Hello world");
+
+ 
