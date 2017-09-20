@@ -51,6 +51,7 @@ class Player {
                 int arg4 = in.nextInt();
                 int arg5 = in.nextInt();
 
+                // toto
                 if (entityType.equals("FACTORY")) {
                     Factory theFactory = new Factory();
                     theFactory._id=entityId;
@@ -58,7 +59,7 @@ class Player {
                     theFactory._nbCyborgs=arg2;
                     theFactory._production=arg3;
                     // System.err.println(theBoard);
-                    theBoard._factories = new ArrayList<Factory>();
+                    theBoard._factories = new ArrayList<Factory>(); //toto
                     theBoard._factories.add(theFactory);
                     System.err.println("Added factory "+theBoard._factories.size());
                     System.err.println("Factory "+theFactory._id+" of user "+theFactory._owner+" has "+theFactory._nbCyborgs+" cyborgs");
