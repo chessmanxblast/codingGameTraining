@@ -14,10 +14,12 @@ class Factory {
     int _production;
 }
 class Troop {
+    int _id;
     int _owner;
     int _sourceFactory;
     int _destFactory;
     int _nbCyborgs;
+    int _timeToDest;
 }
 class Board {
     List<Factory> _factories;
@@ -41,6 +43,8 @@ class Player {
         while (true) {
 
             Board theBoard = new Board();
+            theBoard._factories = new ArrayList<Factory>();
+            theBoard._troops = new ArrayList<Troop>();
             int entityCount = in.nextInt(); // the number of entities (e.g. factories and troops)
             for (int i = 0; i < entityCount; i++) {
                 int entityId = in.nextInt();
@@ -57,12 +61,28 @@ class Player {
                     theFactory._owner=arg1;
                     theFactory._nbCyborgs=arg2;
                     theFactory._production=arg3;
-                    // System.err.println(theBoard);
-                    theBoard._factories = new ArrayList<Factory>();
+
                     theBoard._factories.add(theFactory);
+
                     System.err.println("Added factory "+theBoard._factories.size());
                     System.err.println("Factory "+theFactory._id+" of user "+theFactory._owner+" has "+theFactory._nbCyborgs+" cyborgs");
                 }
+
+                if (entityType.equals("TROOP")) {
+                    Troop theTroop = new Troop();
+                    theTroop._id=entityId;
+                    theTroop._owner=arg1;
+                    theTroop._sourceFactory=arg2;
+                    theTroop._destFactory=arg3;
+                    theTroop._nbCyborgs=arg4;
+                    theTroop._timeToDest=arg5;
+
+                    theBoard._troops.add(theTroop);
+
+                    System.err.println("Added troop "+theBoard._troops.size());
+                    System.err.println("Troop "+theTroop._id+" of user "+theTroop._owner+" has "+theTroop._nbCyborgs+" cyborgs");
+                }
+
                 System.err.println("test");
 
                 // if (entityType=="TROOP ") {}
