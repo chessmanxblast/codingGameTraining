@@ -57,8 +57,10 @@ class Player {
                     theFactory._owner=arg1;
                     theFactory._nbCyborgs=arg2;
                     theFactory._production=arg3;
-                    // theBoard._factories.add(theFactory);
-                    // System.err.println("Added factory "+theFactory._id);
+                    // System.err.println(theBoard);
+                    theBoard._factories = new ArrayList<Factory>();
+                    theBoard._factories.add(theFactory);
+                    System.err.println("Added factory "+theBoard._factories.size());
                     System.err.println("Factory "+theFactory._id+" of user "+theFactory._owner+" has "+theFactory._nbCyborgs+" cyborgs");
                 }
                 System.err.println("test");
