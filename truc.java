@@ -20,6 +20,7 @@ class Planet{
     int _owner;
     List<Planet> _neighbors;
     int _distanceFromClosestEnemy;
+    int _ranking; // the higher the value, the best to send unit to
 }
 
 class Player {
