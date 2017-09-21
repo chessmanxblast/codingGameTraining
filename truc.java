@@ -4,10 +4,10 @@ import java.math.*;
 
 class Board{
     List<Planet> _planets;
-    List<int> _myPlanets;
-    List<int> _enemyPlanets;
-    List<int> _neutralPlanets;
-    List<int> _assignablePlanets;
+    List<Integer> _myPlanets;
+    List<Integer> _enemyPlanets;
+    List<Integer> _neutralPlanets;
+    List<Integer> _assignablePlanets;
 }
 
 class Planet{
@@ -53,10 +53,10 @@ class Player {
         // game loop
         while (true) {
             //reinitializes each turn the lists of my planets, enemy, neutral planets, and planets i can send units to
-            theBoard._myPlanets = new ArrayList<int>();
-            theBoard._enemyPlanets = new ArrayList<int>();
-            theBoard._neutralPlanets = new ArrayList<int>();
-            theBoard._assignablePlanets = new ArrayList<int>();
+            theBoard._myPlanets = new ArrayList<Integer>();
+            theBoard._enemyPlanets = new ArrayList<Integer>();
+            theBoard._neutralPlanets = new ArrayList<Integer>();
+            theBoard._assignablePlanets = new ArrayList<Integer>();
 
             for (int i = 0; i < planetCount; i++) {
                 int myUnits = in.nextInt();
@@ -98,7 +98,7 @@ class Player {
 
             //calculate distances from enemy
             for (int i = 0; i < planetCount; i++) {
-                //reinit
+                //reset _distanceFromClosestEnemy
                 if (theBoard._planets.get(i)._owner == -1) {
                     theBoard._planets.get(i)._distanceFromClosestEnemy = 0;
                 }
@@ -135,6 +135,13 @@ class Player {
                 }
                 currentDistance++;
             }
+
+            for (int i = 0; i < planetCount; i++) {
+                //reset _ranking - the closest the distance from enemy, the better
+                theBoard._planets.get(i)._ranking = 100-theBoard._planets.get(i)._distanceFromClosestEnemy;
+                // System.err.println(i + " has a ranking of " + theBoard._planets.get(i)._ranking);
+            }
+
 
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
