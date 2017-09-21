@@ -2,99 +2,67 @@ import java.util.*;
 import java.io.*;
 import java.math.*;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
+class Board{
+    List<Planet> _planets;
+}
 
-class Factory {
-    int _id;
-    int _owner;
-    int _nbCyborgs;
-    int _production;
-}
-class Troop {
-    int _id;
-    int _owner;
-    int _sourceFactory;
-    int _destFactory;
-    int _nbCyborgs;
-    int _timeToDest;
-}
-class Board {
-    List<Factory> _factories;
-    List<Troop> _troops;
+class Planet{
+    int _myUnits;
+    int _myTolerance;
+    int _otherUnits;
+    int _otherTolerance;
+    int _canAssign;
+    List<Planet> _neighbors;
 }
 
 class Player {
 
     public static void main(String args[]) {
-
         Scanner in = new Scanner(System.in);
-        int factoryCount = in.nextInt(); // the number of factories
-        int linkCount = in.nextInt(); // the number of links between factories
-        for (int i = 0; i < linkCount; i++) {
-            int factory1 = in.nextInt();
-            int factory2 = in.nextInt();
-            int distance = in.nextInt();
+        int planetCount = in.nextInt();
+        int edgeCount = in.nextInt();
+
+        Board theBoard = new Board();
+        theBoard._planets = new ArrayList<Planet>();
+
+
+        for (int i = 0; i < planetCount; i++){
+            Planet thePlanet = new Planet();
+            thePlanet._neighbors = new ArrayList<Planet>();
+            theBoard._planets.add(thePlanet);
+        }
+
+        for (int i = 0; i < edgeCount; i++) {
+            int planetA = in.nextInt();
+            int planetB = in.nextInt();
+            theBoard._planets.get(planetA)._neighbors.add(theBoard._planets.get(planetB));
+            theBoard._planets.get(planetB)._neighbors.add(theBoard._planets.get(planetA));
         }
 
         // game loop
         while (true) {
-
-            Board theBoard = new Board();
-            theBoard._factories = new ArrayList<Factory>();
-            theBoard._troops = new ArrayList<Troop>();
-            int entityCount = in.nextInt(); // the number of entities (e.g. factories and troops)
-            for (int i = 0; i < entityCount; i++) {
-                int entityId = in.nextInt();
-                String entityType = in.next();
-                int arg1 = in.nextInt();
-                int arg2 = in.nextInt();
-                int arg3 = in.nextInt();
-                int arg4 = in.nextInt();
-                int arg5 = in.nextInt();
-
-                if (entityType.equals("FACTORY")) {
-                    Factory theFactory = new Factory();
-                    theFactory._id=entityId;
-                    theFactory._owner=arg1;
-                    theFactory._nbCyborgs=arg2;
-                    theFactory._production=arg3;
-
-                    theBoard._factories.add(theFactory);
-
-                    System.err.println("Added factory "+theBoard._factories.size());
-                    System.err.println("Factory "+theFactory._id+" of user "+theFactory._owner+" has "+theFactory._nbCyborgs+" cyborgs");
-                }
-
-                if (entityType.equals("TROOP")) {
-                    Troop theTroop = new Troop();
-                    theTroop._id=entityId;
-                    theTroop._owner=arg1;
-                    theTroop._sourceFactory=arg2;
-                    theTroop._destFactory=arg3;
-                    theTroop._nbCyborgs=arg4;
-                    theTroop._timeToDest=arg5;
-
-                    theBoard._troops.add(theTroop);
-
-                    System.err.println("Added troop "+theBoard._troops.size());
-                    System.err.println("Troop "+theTroop._id+" of user "+theTroop._owner+" has "+theTroop._nbCyborgs+" cyborgs");
-                }
-
-                System.err.println("test");
-
-                // if (entityType=="TROOP ") {}
-
+            for (int i = 0; i < planetCount; i++) {
+                int myUnits = in.nextInt();
+                int myTolerance = in.nextInt();
+                int otherUnits = in.nextInt();
+                int otherTolerance = in.nextInt();
+                int canAssign = in.nextInt();
+                theBoard._planets.get(i)._myUnits = myUnits;
+                theBoard._planets.get(i)._myTolerance = myTolerance;
+                theBoard._planets.get(i)._otherUnits = otherUnits;
+                theBoard._planets.get(i)._otherTolerance = otherTolerance;
+                theBoard._planets.get(i)._canAssign = canAssign;
             }
 
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
 
-
-            // Any valid action, such as "WAIT" or "MOVE source destination cyborgs"
-            System.out.println("WAIT");
+            System.out.println("0");
+            System.out.println("0");
+            System.out.println("0");
+            System.out.println("0");
+            System.out.println("0");
+            System.out.println("NONE");
         }
     }
 }
