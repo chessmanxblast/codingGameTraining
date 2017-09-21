@@ -91,8 +91,9 @@ class Player {
                 }
 
                 //if the owner is still 0, add ID to the list of neutral planets
-                if (theBoard._planets.get(i)._owner == 0){
+                if (theBoard._planets.get(i)._myUnits == theBoard._planets.get(i)._otherUnits){
                     theBoard._neutralPlanets.add(i);
+                    theBoard._planets.get(i)._owner = 0;
                 }
 
                 //if we can assign units to the planet, add ID to list of assignable planets
@@ -129,6 +130,8 @@ class Player {
                 }
                 //System.err.println("planet #" + i + " numNeigh:" + theBoard._planets.get(i)._numberOfNeighbors + " numAss:" + theBoard._planets.get(i)._numberOfAssignableNeigbors + " numNeut:" + theBoard._planets.get(i)._numberOfNeutralNeighbors + " numMy:"+ theBoard._planets.get(i)._numberOfFriendNeighbors + " numEnm:" + theBoard._planets.get(i)._numberOfEnemyNeighbors);
             }
+
+
 
             //calculate distances from enemy
             for (int i = 0; i < planetCount; i++) {
@@ -170,9 +173,11 @@ class Player {
                 currentDistance++;
             }
 
+
+
             // get the ranking of each planet
             for (int i = 0; i < planetCount; i++) {
-                //reset _ranking - the closest the distance from enemy, the better (the distance should be >0 though)
+                //reset _ranking - the closer the distance from enemy, the better (the distance should be >0 though)
                 // keep track of the top 5 planets
                 if (theBoard._planets.get(i)._distanceFromClosestEnemy>0) {
                     theBoard._planets.get(i)._ranking = -theBoard._planets.get(i)._distanceFromClosestEnemy;
@@ -191,12 +196,10 @@ class Player {
                 int planetToAdd = -1;
                 for (int i = 0; i < planetCount; i++) {
                     if (theBoard._planets.get(i)._ranking>maxRankingSoFar
-                            && theBoard._planets.get(i)._canAssign>0) {
-                        //
-                        if (!bestPlanetToTarget.contains(i)) {
-                            planetToAdd=i;
-                            maxRankingSoFar=theBoard._planets.get(i)._ranking;
-                        }
+                            && theBoard._planets.get(i)._canAssign>0
+                            && bestPlanetToTarget.contains(i) == false) {
+                        planetToAdd=i;
+                        maxRankingSoFar=theBoard._planets.get(i)._ranking;
                     }
                 }
                 if (planetToAdd!=-1) {
