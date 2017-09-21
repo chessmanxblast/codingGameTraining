@@ -93,8 +93,9 @@ class Player {
                 }
 
                 //if the owner is still 0, add ID to the list of neutral planets
-                if (theBoard._planets.get(i)._owner == 0){
+                if (theBoard._planets.get(i)._myUnits == theBoard._planets.get(i)._otherUnits){
                     theBoard._neutralPlanets.add(i);
+                    theBoard._planets.get(i)._owner = 0;
                 }
 
                 //if we can assign units to the planet, add ID to list of assignable planets
