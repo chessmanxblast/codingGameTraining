@@ -31,6 +31,7 @@ class Player {
         for (int i = 0; i < planetCount; i++){
             Planet thePlanet = new Planet();
             thePlanet._id = i;
+            thePlanet._owner = 0;
             thePlanet._neighbors = new ArrayList<Planet>();
             theBoard._planets.add(thePlanet);
         }
