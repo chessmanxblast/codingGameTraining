@@ -167,12 +167,10 @@ class Player {
                         theBoard._planets.get(i)._numberOfNeutralNeighbors++;
                         if (theBoard._planets.get(i)._neighbors.get(n)._distanceFromClosestEnemy==1) {
                             theBoard._planets.get(i)._numberOfVulnerableNeutralNeighbors++;
-                            if (i==27){System.err.println("toto 7 ");}
                         }
                     }
                     if (theBoard._planets.get(i)._neighbors.get(n)._owner == 1){
                         theBoard._planets.get(i)._numberOfFriendNeighbors++;
-                        if (i==27){System.err.println("toto 6 ");}
                     }
                     if (theBoard._planets.get(i)._neighbors.get(n)._owner == -1){
                         theBoard._planets.get(i)._numberOfEnemyNeighbors++;
@@ -199,15 +197,10 @@ class Player {
 
 
                 if (theBoard._planets.get(i)._owner==0) {
-                    if (i==17){System.err.println("toto 1");}
                     for (int j = 0; j < theBoard._planets.get(i)._neighbors.size(); j++) {
                         Planet neighbor = theBoard._planets.get(i)._neighbors.get(j);
-                        if (i==17){System.err.println("toto 2 "+neighbor._id+" "+neighbor._owner);}
-                        if (i==17){System.err.println("toto 4 "+neighbor._id+" "+neighbor._numberOfVulnerableNeutralNeighbors);}
-                        if (i==17){System.err.println("toto 5 "+neighbor._id+" "+neighbor._numberOfFriendNeighbors);}
                         if (neighbor._owner==1
                                 && neighbor._numberOfVulnerableNeutralNeighbors>neighbor._numberOfFriendNeighbors) {
-                            if (i==17){System.err.println("toto 3");}
                             theBoard._planets.get(i)._ranking = 50;
                         }
                     }
