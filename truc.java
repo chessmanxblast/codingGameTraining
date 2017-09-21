@@ -4,6 +4,10 @@ import java.math.*;
 
 class Board{
     List<Planet> _planets;
+    List<int> _myPlanets;
+    List<int> _enemyPlanets;
+    List<int> _neutralPlanets;
+    List<int> _assignablePlanets;
 }
 
 class Planet{
@@ -27,7 +31,6 @@ class Player {
         Board theBoard = new Board();
         theBoard._planets = new ArrayList<Planet>();
 
-
         for (int i = 0; i < planetCount; i++){
             Planet thePlanet = new Planet();
             thePlanet._id = i;
@@ -43,25 +46,52 @@ class Player {
             theBoard._planets.get(planetB)._neighbors.add(theBoard._planets.get(planetA));
         }
 
+
+
         // game loop
         while (true) {
+            //reinitializes each turn the lists of my planets, enemy, neutral planets, and planets i can send units to
+            theBoard._myPlanets = new ArrayList<int>();
+            theBoard._enemyPlanets = new ArrayList<int>();
+            theBoard._neutralPlanets = new ArrayList<int>();
+            theBoard._assignablePlanets = new ArrayList<int>();
+
             for (int i = 0; i < planetCount; i++) {
                 int myUnits = in.nextInt();
                 int myTolerance = in.nextInt();
                 int otherUnits = in.nextInt();
                 int otherTolerance = in.nextInt();
                 int canAssign = in.nextInt();
+
+                //define planet parameters
                 theBoard._planets.get(i)._myUnits = myUnits;
                 theBoard._planets.get(i)._myTolerance = myTolerance;
                 theBoard._planets.get(i)._otherUnits = otherUnits;
                 theBoard._planets.get(i)._otherTolerance = otherTolerance;
                 theBoard._planets.get(i)._canAssign = canAssign;
+
+                //if I have more units on planet that him, I am owner; add ID to list of planets I control
                 if (theBoard._planets.get(i)._myUnits > theBoard._planets.get(i)._otherUnits){
                     theBoard._planets.get(i)._owner = 1;
+                    theBoard._myPlanets.add(i);
                 }
+
+                //if he has more units on planet, he is owner; add ID to list of planets he controls
                 if (theBoard._planets.get(i)._myUnits < theBoard._planets.get(i)._otherUnits){
                     theBoard._planets.get(i)._owner = -1;
+                    theBoard._enemyPlanets.add(i);
                 }
+
+                //if the owner is still 0, add ID to the list of neutral planets
+                if (theBoard._planets.get(i)._owner == 0) {
+                    theBoard._neutralPlanets.add(i);
+                }
+
+                //if we can assign units to the planet, add ID to list of assignable planets
+                if (theBoard._planets.get(i)._canAssign == 1){
+                    theBoard._assignablePlanets.add(i);
+                }
+
             }
 
             // Write an action using System.out.println()
