@@ -214,8 +214,17 @@ class Player {
             int topBestPlanetToTarget=bestPlanetToTarget.get(0);
             System.err.println("topBestPlanetToTarget : "+topBestPlanetToTarget+" at distance "+theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy);
 
-            //if planet is still far from enemy, move the fastest possible to it using spread
-            if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy>2) {
+            //check if we already encountered the enemy
+            int closestDistance=10000;
+            for (int i = 0; i < planetCount; i++) {
+                if (theBoard._planets.get(i)._owner == 1
+                        && theBoard._planets.get(i)._distanceFromClosestEnemy <closestDistance){
+                    closestDistance=theBoard._planets.get(i)._distanceFromClosestEnemy;
+                }
+            }
+            //if closest planet from enemy is still far from enemy (closestDistance>1), move the fastest possible to it using spread
+            if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy>2
+                        && closestDistance>1) {
                 System.out.println(topBestPlanetToTarget);
                 System.out.println(topBestPlanetToTarget);
                 System.out.println(topBestPlanetToTarget);
