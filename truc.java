@@ -25,6 +25,7 @@ class Planet{
     int _numberOfNeighbors;
     int _numberOfAssignableNeigbors;
     int _numberOfNeutralNeighbors;
+    int _numberOfVulnerableNeutralNeighbors;
     int _numberOfFriendNeighbors;
     int _numberOfEnemyNeighbors;
 }
@@ -103,34 +104,6 @@ class Player {
 
             }
 
-            //define different planet neighbor counts
-            for (int i = 0; i < planetCount; i++) {
-                //define the number of neighbors each planet has; initialize the other neighbor numbers back to zero
-                theBoard._planets.get(i)._numberOfNeighbors = theBoard._planets.get(i)._neighbors.size();
-                theBoard._planets.get(i)._numberOfAssignableNeigbors = 0;
-                theBoard._planets.get(i)._numberOfNeutralNeighbors = 0;
-                theBoard._planets.get(i)._numberOfFriendNeighbors = 0;
-                theBoard._planets.get(i)._numberOfEnemyNeighbors = 0;
-
-                //for planet i, loop over all of its neigbors. based on owner and assignability,
-                //increment planet i's assignable, neutral, friendly, and enemy neighbor counts
-                for (int n = 0; n < theBoard._planets.get(i)._numberOfNeighbors; n++){
-                    if (theBoard._planets.get(i)._neighbors.get(n)._canAssign == 1){
-                        theBoard._planets.get(i)._numberOfAssignableNeigbors++;
-                    }
-                    if (theBoard._planets.get(i)._neighbors.get(n)._owner == 0){
-                        theBoard._planets.get(i)._numberOfNeutralNeighbors++;
-                    }
-                    if (theBoard._planets.get(i)._neighbors.get(n)._owner == 1){
-                        theBoard._planets.get(i)._numberOfFriendNeighbors++;
-                    }
-                    if (theBoard._planets.get(i)._neighbors.get(n)._owner == -1){
-                        theBoard._planets.get(i)._numberOfEnemyNeighbors++;
-                    }
-                }
-                //System.err.println("planet #" + i + " numNeigh:" + theBoard._planets.get(i)._numberOfNeighbors + " numAss:" + theBoard._planets.get(i)._numberOfAssignableNeigbors + " numNeut:" + theBoard._planets.get(i)._numberOfNeutralNeighbors + " numMy:"+ theBoard._planets.get(i)._numberOfFriendNeighbors + " numEnm:" + theBoard._planets.get(i)._numberOfEnemyNeighbors);
-            }
-
             //calculate distances from enemy
             for (int i = 0; i < planetCount; i++) {
                 //reset _distanceFromClosestEnemy
@@ -157,7 +130,7 @@ class Player {
                         int minNeighborsDist=10000;
                         for (int j = 0; j < planetToCheck._neighbors.size(); j++) {
                             if (planetToCheck._neighbors.get(j)._distanceFromClosestEnemy!=-1
-                                        && planetToCheck._neighbors.get(j)._distanceFromClosestEnemy<minNeighborsDist) {
+                                    && planetToCheck._neighbors.get(j)._distanceFromClosestEnemy<minNeighborsDist) {
                                 minNeighborsDist=planetToCheck._neighbors.get(j)._distanceFromClosestEnemy;
                             }
                         }
@@ -170,6 +143,42 @@ class Player {
                 }
                 currentDistance++;
             }
+
+
+            //define different planet neighbor counts
+            for (int i = 0; i < planetCount; i++) {
+                //define the number of neighbors each planet has; initialize the other neighbor numbers back to zero
+                theBoard._planets.get(i)._numberOfNeighbors = theBoard._planets.get(i)._neighbors.size();
+                theBoard._planets.get(i)._numberOfAssignableNeigbors = 0;
+                theBoard._planets.get(i)._numberOfNeutralNeighbors = 0;
+                theBoard._planets.get(i)._numberOfFriendNeighbors = 0;
+                theBoard._planets.get(i)._numberOfVulnerableNeutralNeighbors = 0;
+                theBoard._planets.get(i)._numberOfEnemyNeighbors = 0;
+
+                //for planet i, loop over all of its neigbors. based on owner and assignability,
+                //increment planet i's assignable, neutral, friendly, and enemy neighbor counts
+                for (int n = 0; n < theBoard._planets.get(i)._numberOfNeighbors; n++){
+                    if (theBoard._planets.get(i)._neighbors.get(n)._canAssign == 1){
+                        theBoard._planets.get(i)._numberOfAssignableNeigbors++;
+                    }
+                    if (theBoard._planets.get(i)._neighbors.get(n)._owner == 0){
+                        theBoard._planets.get(i)._numberOfNeutralNeighbors++;
+                        if (theBoard._planets.get(i)._neighbors.get(n)._distanceFromClosestEnemy==1) {
+                            theBoard._planets.get(i)._numberOfVulnerableNeutralNeighbors++;
+                            if (i==27){System.err.println("toto 7 ");}
+                        }
+                    }
+                    if (theBoard._planets.get(i)._neighbors.get(n)._owner == 1){
+                        theBoard._planets.get(i)._numberOfFriendNeighbors++;
+                        if (i==27){System.err.println("toto 6 ");}
+                    }
+                    if (theBoard._planets.get(i)._neighbors.get(n)._owner == -1){
+                        theBoard._planets.get(i)._numberOfEnemyNeighbors++;
+                    }
+                }
+                //System.err.println("planet #" + i + " numNeigh:" + theBoard._planets.get(i)._numberOfNeighbors + " numAss:" + theBoard._planets.get(i)._numberOfAssignableNeigbors + " numNeut:" + theBoard._planets.get(i)._numberOfNeutralNeighbors + " numMy:"+ theBoard._planets.get(i)._numberOfFriendNeighbors + " numEnm:" + theBoard._planets.get(i)._numberOfEnemyNeighbors);
+            }
+
 
             //check if we already encountered the enemy
             int closestDistanceBetweenUsAndEnemy=10000;
@@ -186,6 +195,22 @@ class Player {
                 theBoard._planets.get(i)._ranking=0;
                 theBoard._planets.get(i)._nbNeededUnitsToFeelSafe=0;
 
+
+                if (theBoard._planets.get(i)._owner==0) {
+                    if (i==17){System.err.println("toto 1");}
+                    for (int j = 0; j < theBoard._planets.get(i)._neighbors.size(); j++) {
+                        Planet neighbor = theBoard._planets.get(i)._neighbors.get(j);
+                        if (i==17){System.err.println("toto 2 "+neighbor._id+" "+neighbor._owner);}
+                        if (i==17){System.err.println("toto 4 "+neighbor._id+" "+neighbor._numberOfVulnerableNeutralNeighbors);}
+                        if (i==17){System.err.println("toto 5 "+neighbor._id+" "+neighbor._numberOfFriendNeighbors);}
+                        if (neighbor._owner==1
+                                && neighbor._numberOfVulnerableNeutralNeighbors>neighbor._numberOfFriendNeighbors) {
+                            if (i==17){System.err.println("toto 3");}
+                            theBoard._planets.get(i)._ranking = 50;
+                        }
+                    }
+                }
+
                 if (closestDistanceBetweenUsAndEnemy>1
                         && theBoard._planets.get(i)._owner==0) {
                     // the closest the distance from enemy, the better, while we are in the attack phase
@@ -194,14 +219,18 @@ class Player {
                 else if (closestDistanceBetweenUsAndEnemy==1
                         && theBoard._planets.get(i)._owner==0
                         && theBoard._planets.get(i)._distanceFromClosestEnemy==2) {
-                    // the closest the distance from enemy, the better, while we are in the attack phase
+                    //dist 2 is support
                     theBoard._planets.get(i)._ranking = 40;
                 }
-                else if (theBoard._planets.get(i)._owner==1) {
-
+                else if (closestDistanceBetweenUsAndEnemy==1
+                        && theBoard._planets.get(i)._owner==0
+                        && theBoard._planets.get(i)._distanceFromClosestEnemy==1) {
+                    theBoard._planets.get(i)._ranking = 30;
                 }
-                else if (theBoard._planets.get(i)._owner==-1) {
-
+                else if (closestDistanceBetweenUsAndEnemy==1
+                        && theBoard._planets.get(i)._owner==1
+                        && theBoard._planets.get(i)._distanceFromClosestEnemy==1) {
+                    theBoard._planets.get(i)._ranking = 20;
                 }
 
                 if (theBoard._planets.get(i)._numberOfFriendNeighbors>=theBoard._planets.get(i)._numberOfEnemyNeighbors
