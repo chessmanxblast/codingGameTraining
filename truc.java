@@ -145,7 +145,7 @@ class Player {
                 } else {
                     theBoard._planets.get(i)._ranking = -1000000;
                 }
-                System.err.println("Planet " + i +" has a ranking of "+theBoard._planets.get(i)._ranking);
+               // System.err.println("Planet " + i +" has a ranking of "+theBoard._planets.get(i)._ranking);
             }
            // System.err.println(" we have " + theBoard._bestPlanetsToTarget.size()+" good planets to target");
 
@@ -156,7 +156,8 @@ class Player {
                 int maxRankingSoFar=-1000000;
                 int planetToAdd = -1;
                 for (int i = 0; i < planetCount; i++) {
-                    if (theBoard._planets.get(i)._ranking>maxRankingSoFar && theBoard._planets.get(i)._canAssign>0) {
+                    if (theBoard._planets.get(i)._ranking>maxRankingSoFar
+                            && theBoard._planets.get(i)._canAssign>0) {
                         //
                         if (!bestPlanetToTarget.contains(i)) {
                             planetToAdd=i;
@@ -164,11 +165,16 @@ class Player {
                         }
                     }
                 }
-                bestPlanetToTarget.add(planetToAdd);
+                if (planetToAdd!=-1) {
+                    bestPlanetToTarget.add(planetToAdd);
+                }
             }
 
             for (int k=0; k<bestPlanetToTarget.size(); k++) {
               System.out.println(bestPlanetToTarget.get(k));
+            }
+            for (int k=bestPlanetToTarget.size(); k<5; k++) {
+                System.out.println(bestPlanetToTarget.get(0));
             }
 
 
