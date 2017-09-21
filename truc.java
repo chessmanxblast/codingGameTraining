@@ -136,21 +136,50 @@ class Player {
                 currentDistance++;
             }
 
+            // get the ranking of each planet
             for (int i = 0; i < planetCount; i++) {
-                //reset _ranking - the closest the distance from enemy, the better
-                theBoard._planets.get(i)._ranking = 100-theBoard._planets.get(i)._distanceFromClosestEnemy;
-                // System.err.println(i + " has a ranking of " + theBoard._planets.get(i)._ranking);
+                //reset _ranking - the closest the distance from enemy, the better (the distance should be >0 though)
+                // keep track of the top 5 planets
+                if (theBoard._planets.get(i)._distanceFromClosestEnemy>0) {
+                    theBoard._planets.get(i)._ranking = -theBoard._planets.get(i)._distanceFromClosestEnemy;
+                } else {
+                    theBoard._planets.get(i)._ranking = -1000000;
+                }
+                System.err.println("Planet " + i +" has a ranking of "+theBoard._planets.get(i)._ranking);
+            }
+           // System.err.println(" we have " + theBoard._bestPlanetsToTarget.size()+" good planets to target");
+
+            // get the top 5 planets to send units to
+            // ArrayUtils arrayUtils=new ArrayUtils();
+            ArrayList<Integer> bestPlanetToTarget = new ArrayList<Integer>();
+            for (int k=0; k<5; k++) {
+                int maxRankingSoFar=-1000000;
+                int planetToAdd = -1;
+                for (int i = 0; i < planetCount; i++) {
+                    if (theBoard._planets.get(i)._ranking>maxRankingSoFar && theBoard._planets.get(i)._canAssign>0) {
+                        //
+                        if (!bestPlanetToTarget.contains(i)) {
+                            planetToAdd=i;
+                            maxRankingSoFar=theBoard._planets.get(i)._ranking;
+                        }
+                    }
+                }
+                bestPlanetToTarget.add(planetToAdd);
+            }
+
+            for (int k=0; k<bestPlanetToTarget.size(); k++) {
+              System.out.println(bestPlanetToTarget.get(k));
             }
 
 
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
 
-            System.out.println("0");
-            System.out.println("0");
-            System.out.println("0");
-            System.out.println("0");
-            System.out.println("0");
+           // System.out.println("0");
+           // System.out.println("0");
+           // System.out.println("0");
+           // System.out.println("0");
+           // System.out.println("0");
             System.out.println("NONE");
         }
     }
