@@ -112,7 +112,7 @@ class Player {
             int currentDistance=1;
             while (stillSomePlanetToCheck) {
                 stillSomePlanetToCheck=false;
-                System.err.println("checking round");
+//                System.err.println("checking round");
                 //those not yet calculated that are neighbour of a calculated get's its distance+1
                 for (int i = 0; i < planetCount; i++) {
                     Planet planetToCheck=theBoard._planets.get(i);
@@ -128,7 +128,7 @@ class Player {
                         if (minNeighborsDist!=10000
                                 && currentDistance==minNeighborsDist+1) {
                             planetToCheck._distanceFromClosestEnemy = currentDistance;
-                            System.err.println(i + " is at distance " + theBoard._planets.get(i)._distanceFromClosestEnemy + " from ennemy");
+//                            System.err.println(i + " is at distance " + theBoard._planets.get(i)._distanceFromClosestEnemy + " from ennemy");
                         }
                     }
                 }
