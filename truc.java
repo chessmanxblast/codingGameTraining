@@ -179,11 +179,20 @@ class Player {
             for (int i = 0; i < planetCount; i++) {
                 //reset _ranking - the closer the distance from enemy, the better (the distance should be >0 though)
                 // keep track of the top 5 planets
+                //reset _ranking -
+                // the closest the distance from enemy, the better
                 if (theBoard._planets.get(i)._distanceFromClosestEnemy>0) {
+
                     theBoard._planets.get(i)._ranking = -theBoard._planets.get(i)._distanceFromClosestEnemy;
+                    // neutral planet come before my planet (+40)
+                    if (theBoard._planets.get(i)._owner==0) {
+                        theBoard._planets.get(i)._ranking += 40;
+                    }
+
                 } else {
                     theBoard._planets.get(i)._ranking = -1000000;
                 }
+
                // System.err.println("Planet " + i +" has a ranking of "+theBoard._planets.get(i)._ranking);
             }
            // System.err.println(" we have " + theBoard._bestPlanetsToTarget.size()+" good planets to target");
@@ -207,11 +216,35 @@ class Player {
                 }
             }
 
-            for (int k=0; k<bestPlanetToTarget.size(); k++) {
-              System.out.println(bestPlanetToTarget.get(k));
+            int topBestPlanetToTarget=bestPlanetToTarget.get(0);
+            System.err.println("topBestPlanetToTarget : "+topBestPlanetToTarget+" at distance "+theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy);
+
+            //if planet is still far from enemy, move the fastest possible to it using spread
+            if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy>2) {
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
             }
-            for (int k=bestPlanetToTarget.size(); k<5; k++) {
-                System.out.println(bestPlanetToTarget.get(0));
+            else if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy==1) {
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println("NONE");
+            } else {
+                // send 1 unit to each planet
+                for (int k=0; k<bestPlanetToTarget.size(); k++) {
+                  System.out.println(bestPlanetToTarget.get(k));
+                }
+                // send remaining units (if any left)
+                for (int k=bestPlanetToTarget.size(); k<5; k++) {
+                    System.out.println(bestPlanetToTarget.get(0));
+                }
+                System.out.println("NONE");
             }
 
 
@@ -223,7 +256,6 @@ class Player {
            // System.out.println("0");
            // System.out.println("0");
            // System.out.println("0");
-            System.out.println("NONE");
         }
     }
 }
