@@ -21,6 +21,7 @@ class Planet{
     List<Planet> _neighbors;
     int _distanceFromClosestEnemy;
     int _ranking; // the higher the value, the best to send unit to
+    int _nbNeededUnitsToFeelSafe;
     int _numberOfNeighbors;
     int _numberOfAssignableNeigbors;
     int _numberOfNeutralNeighbors;
@@ -170,23 +171,48 @@ class Player {
                 currentDistance++;
             }
 
+            //check if we already encountered the enemy
+            int closestDistanceBetweenUsAndEnemy=10000;
+            for (int i = 0; i < planetCount; i++) {
+                if (theBoard._planets.get(i)._owner == 1
+                        && theBoard._planets.get(i)._distanceFromClosestEnemy <closestDistanceBetweenUsAndEnemy){
+                    closestDistanceBetweenUsAndEnemy=theBoard._planets.get(i)._distanceFromClosestEnemy;
+                }
+            }
+
             // get the ranking of each planet
             for (int i = 0; i < planetCount; i++) {
                 //reset _ranking -
-                // the closest the distance from enemy, the better
-                if (theBoard._planets.get(i)._distanceFromClosestEnemy>0) {
+                theBoard._planets.get(i)._ranking=0;
+                theBoard._planets.get(i)._nbNeededUnitsToFeelSafe=0;
 
-                    theBoard._planets.get(i)._ranking = -theBoard._planets.get(i)._distanceFromClosestEnemy;
-                    // neutral planet come before my planet (+40)
-                    if (theBoard._planets.get(i)._owner==0) {
-                        theBoard._planets.get(i)._ranking += 40;
-                    }
+                if (closestDistanceBetweenUsAndEnemy>1
+                        && theBoard._planets.get(i)._owner==0) {
+                    // the closest the distance from enemy, the better, while we are in the attack phase
+                    theBoard._planets.get(i)._ranking = 40-theBoard._planets.get(i)._distanceFromClosestEnemy;
+                }
+                else if (closestDistanceBetweenUsAndEnemy==1
+                        && theBoard._planets.get(i)._owner==0
+                        && theBoard._planets.get(i)._distanceFromClosestEnemy==2) {
+                    // the closest the distance from enemy, the better, while we are in the attack phase
+                    theBoard._planets.get(i)._ranking = 40;
+                }
+                else if (theBoard._planets.get(i)._owner==1) {
 
-                } else {
-                    theBoard._planets.get(i)._ranking = -1000000;
+                }
+                else if (theBoard._planets.get(i)._owner==-1) {
+
                 }
 
-               // System.err.println("Planet " + i +" has a ranking of "+theBoard._planets.get(i)._ranking);
+                if (theBoard._planets.get(i)._numberOfFriendNeighbors>=theBoard._planets.get(i)._numberOfEnemyNeighbors
+                        && theBoard._planets.get(i)._myUnits<=theBoard._planets.get(i)._otherUnits+5
+                        && theBoard._planets.get(i)._distanceFromClosestEnemy==1) {
+                    theBoard._planets.get(i)._ranking+=10;
+                    theBoard._planets.get(i)._nbNeededUnitsToFeelSafe=theBoard._planets.get(i)._otherUnits+6-theBoard._planets.get(i)._myUnits;
+                    System.err.println("Planet " + i +" needs help: "+theBoard._planets.get(i)._nbNeededUnitsToFeelSafe);
+                }
+
+                System.err.println("Planet " + i +" has a ranking of "+theBoard._planets.get(i)._ranking);
             }
            // System.err.println(" we have " + theBoard._bestPlanetsToTarget.size()+" good planets to target");
 
@@ -214,17 +240,11 @@ class Player {
             int topBestPlanetToTarget=bestPlanetToTarget.get(0);
             System.err.println("topBestPlanetToTarget : "+topBestPlanetToTarget+" at distance "+theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy);
 
-            //check if we already encountered the enemy
-            int closestDistance=10000;
-            for (int i = 0; i < planetCount; i++) {
-                if (theBoard._planets.get(i)._owner == 1
-                        && theBoard._planets.get(i)._distanceFromClosestEnemy <closestDistance){
-                    closestDistance=theBoard._planets.get(i)._distanceFromClosestEnemy;
-                }
-            }
-            //if closest planet from enemy is still far from enemy (closestDistance>1), move the fastest possible to it using spread
+
+
             if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy>2
-                        && closestDistance>1) {
+                        && closestDistanceBetweenUsAndEnemy>1) {
+                //if closest planet from enemy is still far from enemy (closestDistance>1), move the fastest possible to it using spread
                 System.out.println(topBestPlanetToTarget);
                 System.out.println(topBestPlanetToTarget);
                 System.out.println(topBestPlanetToTarget);
@@ -232,21 +252,33 @@ class Player {
                 System.out.println(topBestPlanetToTarget);
                 System.out.println(topBestPlanetToTarget);
             }
-            else if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy==1) {
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println("NONE");
-            } else {
-                // send 1 unit to each planet
+            else {
+
+                int nbUnitsAlreadySent=0;
+                // send units to each planet until the planet is safe
                 for (int k=0; k<bestPlanetToTarget.size(); k++) {
-                  System.out.println(bestPlanetToTarget.get(k));
+                    Planet theCurrentPlanet=theBoard._planets.get(bestPlanetToTarget.get(k));
+
+                    if (theCurrentPlanet._nbNeededUnitsToFeelSafe>0) {
+                        while (theCurrentPlanet._nbNeededUnitsToFeelSafe > 0
+                                && nbUnitsAlreadySent < 5) {
+                            System.out.println(bestPlanetToTarget.get(k));
+
+                            nbUnitsAlreadySent++;
+                            theCurrentPlanet._nbNeededUnitsToFeelSafe--;
+                        }
+                    }
+                    else {
+                        if (nbUnitsAlreadySent < 5) {
+                            System.out.println(bestPlanetToTarget.get(k));
+                            nbUnitsAlreadySent++;
+                        }
+                    }
                 }
                 // send remaining units (if any left)
-                for (int k=bestPlanetToTarget.size(); k<5; k++) {
+                for (int k=nbUnitsAlreadySent; k<5; k++) {
                     System.out.println(bestPlanetToTarget.get(0));
+                    nbUnitsAlreadySent++;
                 }
                 System.out.println("NONE");
             }
