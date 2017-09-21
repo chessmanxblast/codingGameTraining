@@ -28,6 +28,7 @@ class Planet{
     int _numberOfEnemyNeighbors;
 }
 
+
 class Player {
 
     public static void main(String args[]) {
