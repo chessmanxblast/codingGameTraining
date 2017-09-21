@@ -237,52 +237,58 @@ class Player {
                 }
             }
 
-            int topBestPlanetToTarget=bestPlanetToTarget.get(0);
-            System.err.println("topBestPlanetToTarget : "+topBestPlanetToTarget+" at distance "+theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy);
-
-
-
-            if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy>2
-                        && closestDistanceBetweenUsAndEnemy>1) {
-                //if closest planet from enemy is still far from enemy (closestDistance>1), move the fastest possible to it using spread
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-                System.out.println(topBestPlanetToTarget);
-            }
-            else {
-
-                int nbUnitsAlreadySent=0;
-                // send units to each planet until the planet is safe
-                for (int k=0; k<bestPlanetToTarget.size(); k++) {
-                    Planet theCurrentPlanet=theBoard._planets.get(bestPlanetToTarget.get(k));
-
-                    if (theCurrentPlanet._nbNeededUnitsToFeelSafe>0) {
-                        while (theCurrentPlanet._nbNeededUnitsToFeelSafe > 0
-                                && nbUnitsAlreadySent < 5) {
-                            System.out.println(bestPlanetToTarget.get(k));
-
-                            nbUnitsAlreadySent++;
-                            theCurrentPlanet._nbNeededUnitsToFeelSafe--;
-                        }
-                    }
-                    else {
-                        if (nbUnitsAlreadySent < 5) {
-                            System.out.println(bestPlanetToTarget.get(k));
-                            nbUnitsAlreadySent++;
-                        }
-                    }
-                }
-                // send remaining units (if any left)
-                for (int k=nbUnitsAlreadySent; k<5; k++) {
-                    System.out.println(bestPlanetToTarget.get(0));
-                    nbUnitsAlreadySent++;
-                }
+            if (bestPlanetToTarget.size()==0) {
+                System.out.println("0");
+                System.out.println("0");
+                System.out.println("0");
+                System.out.println("0");
+                System.out.println("0");
                 System.out.println("NONE");
             }
+            else {
+                int topBestPlanetToTarget = bestPlanetToTarget.get(0);
+                System.err.println("topBestPlanetToTarget : " + topBestPlanetToTarget + " at distance " + theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy);
 
+
+                if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy > 2
+                        && closestDistanceBetweenUsAndEnemy > 1) {
+                    //if closest planet from enemy is still far from enemy (closestDistance>1), move the fastest possible to it using spread
+                    System.out.println(topBestPlanetToTarget);
+                    System.out.println(topBestPlanetToTarget);
+                    System.out.println(topBestPlanetToTarget);
+                    System.out.println(topBestPlanetToTarget);
+                    System.out.println(topBestPlanetToTarget);
+                    System.out.println(topBestPlanetToTarget);
+                } else {
+
+                    int nbUnitsAlreadySent = 0;
+                    // send units to each planet until the planet is safe
+                    for (int k = 0; k < bestPlanetToTarget.size(); k++) {
+                        Planet theCurrentPlanet = theBoard._planets.get(bestPlanetToTarget.get(k));
+
+                        if (theCurrentPlanet._nbNeededUnitsToFeelSafe > 0) {
+                            while (theCurrentPlanet._nbNeededUnitsToFeelSafe > 0
+                                    && nbUnitsAlreadySent < 5) {
+                                System.out.println(bestPlanetToTarget.get(k));
+
+                                nbUnitsAlreadySent++;
+                                theCurrentPlanet._nbNeededUnitsToFeelSafe--;
+                            }
+                        } else {
+                            if (nbUnitsAlreadySent < 5) {
+                                System.out.println(bestPlanetToTarget.get(k));
+                                nbUnitsAlreadySent++;
+                            }
+                        }
+                    }
+                    // send remaining units (if any left)
+                    for (int k = nbUnitsAlreadySent; k < 5; k++) {
+                        System.out.println(bestPlanetToTarget.get(0));
+                        nbUnitsAlreadySent++;
+                    }
+                    System.out.println("NONE");
+                }
+            }
 
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
