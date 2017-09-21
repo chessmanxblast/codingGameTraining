@@ -170,11 +170,24 @@ class Player {
                 }
             }
 
-            for (int k=0; k<bestPlanetToTarget.size(); k++) {
-              System.out.println(bestPlanetToTarget.get(k));
-            }
-            for (int k=bestPlanetToTarget.size(); k<5; k++) {
-                System.out.println(bestPlanetToTarget.get(0));
+            int topBestPlanetToTarget=bestPlanetToTarget.get(0);
+            System.err.println("topBestPlanetToTarget : "+topBestPlanetToTarget);
+            if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy==1) {
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+                System.out.println(topBestPlanetToTarget);
+            } else {
+                // send 1 unit to each planet
+                for (int k=0; k<bestPlanetToTarget.size(); k++) {
+                  System.out.println(bestPlanetToTarget.get(k));
+                }
+                // send remaining units (if any left)
+                for (int k=bestPlanetToTarget.size(); k<5; k++) {
+                    System.out.println(bestPlanetToTarget.get(0));
+                }
+
             }
 
 
