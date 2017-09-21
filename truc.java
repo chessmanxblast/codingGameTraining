@@ -20,6 +20,7 @@ class Planet{
     int _owner;
     List<Planet> _neighbors;
     int _distanceFromClosestEnemy;
+    int _distanceFromClosestFriend; // only evaluated at first game turn
     int _ranking; // the higher the value, the best to send unit to
     int _nbNeededUnitsToFeelSafe;
     int _numberOfNeighbors;
@@ -40,6 +41,8 @@ class Player {
 
         Board theBoard = new Board();
         theBoard._planets = new ArrayList<Planet>();
+
+        int nbTurn=0;
 
         //create all of the planets with IDs; initialize planets as neutral; create a list of neighbor planets
         //for each planet; add each planet to theBoard's list of planets.
@@ -104,6 +107,67 @@ class Player {
                     theBoard._assignablePlanets.add(i);
                 }
 
+            }
+
+            //friend distance
+            if(nbTurn==0){
+                //calculate distances from friend
+                for (int i = 0; i < planetCount; i++) {
+                    //reset _distanceFromClosestFriend
+                    if (theBoard._planets.get(i)._owner == 1) {
+                        theBoard._planets.get(i)._distanceFromClosestFriend = 0;
+                    }
+                    else {
+                        //-1 here means "not yet calculated"
+                        theBoard._planets.get(i)._distanceFromClosestFriend = -1;
+                    }
+                }
+                //now, increment by increment, let's populate the neighbours
+                boolean stillSomePlanetToCheck=true;
+                //each loop we will only allocate this distance
+                int currentDistance=1;
+                while (stillSomePlanetToCheck) {
+                    stillSomePlanetToCheck=false;
+//                System.err.println("checking round");
+                    //those not yet calculated that are neighbour of a calculated get's its distance+1
+                    for (int i = 0; i < planetCount; i++) {
+                        Planet planetToCheck=theBoard._planets.get(i);
+                        if (planetToCheck._distanceFromClosestFriend == -1) {
+                            stillSomePlanetToCheck=true;
+                            int minNeighborsDist=10000;
+                            for (int j = 0; j < planetToCheck._neighbors.size(); j++) {
+                                if (planetToCheck._neighbors.get(j)._distanceFromClosestFriend!=-1
+                                        && planetToCheck._neighbors.get(j)._distanceFromClosestFriend<minNeighborsDist) {
+                                    minNeighborsDist=planetToCheck._neighbors.get(j)._distanceFromClosestFriend;
+                                }
+                            }
+                            if (minNeighborsDist!=10000
+                                    && currentDistance==minNeighborsDist+1) {
+                                planetToCheck._distanceFromClosestFriend = currentDistance;
+//                            System.err.println(i + " is at distance " + theBoard._planets.get(i)._distanceFromClosestFriend + " from friend");
+                            }
+                        }
+                    }
+                    currentDistance++;
+                }
+            }
+
+            int DistClosestNeigbourhsEquidistant=100000;
+            int StrategicPoint=-1;
+            for (int i = 0; i < planetCount; i++) {
+                Planet planetToCheck=theBoard._planets.get(i);
+                boolean hasANeighbourNotEquidistant=false;
+                for (int j = 0; j < planetToCheck._neighbors.size(); j++) {
+                    if (planetToCheck._neighbors.get(j)._distanceFromClosestFriend != planetToCheck._neighbors.get(j)._distanceFromClosestEnemy) {
+                        hasANeighbourNotEquidistant=true;
+                    }
+                }
+                if (!hasANeighbourNotEquidistant) {
+                    if(planetToCheck._distanceFromClosestEnemy< DistClosestNeigbourhsEquidistant){
+                        DistClosestNeigbourhsEquidistant=planetToCheck._distanceFromClosestEnemy;
+                        StrategicPoint=planetToCheck._id;
+                    }
+                }
             }
 
             //calculate distances from enemy
@@ -322,6 +386,8 @@ class Player {
            // System.out.println("0");
            // System.out.println("0");
            // System.out.println("0");
+
+            nbTurn++;
         }
     }
 }
