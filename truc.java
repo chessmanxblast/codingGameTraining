@@ -213,8 +213,6 @@ class Player {
 
             int topBestPlanetToTarget=bestPlanetToTarget.get(0);
             System.err.println("topBestPlanetToTarget : "+topBestPlanetToTarget+" at distance "+theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy);
-            if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy==1) {
-            System.err.println("topBestPlanetToTarget : "+topBestPlanetToTarget);
 
             //if planet is still far from enemy, move the fastest possible to it using spread
             if (theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy>2) {
