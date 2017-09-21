@@ -7,11 +7,13 @@ class Board{
 }
 
 class Planet{
+    int _id;
     int _myUnits;
     int _myTolerance;
     int _otherUnits;
     int _otherTolerance;
     int _canAssign;
+    int _owner;
     List<Planet> _neighbors;
 }
 
@@ -28,6 +30,7 @@ class Player {
 
         for (int i = 0; i < planetCount; i++){
             Planet thePlanet = new Planet();
+            thePlanet._id = i;
             thePlanet._neighbors = new ArrayList<Planet>();
             theBoard._planets.add(thePlanet);
         }
@@ -52,6 +55,12 @@ class Player {
                 theBoard._planets.get(i)._otherUnits = otherUnits;
                 theBoard._planets.get(i)._otherTolerance = otherTolerance;
                 theBoard._planets.get(i)._canAssign = canAssign;
+                if (theBoard._planets.get(i)._myUnits > theBoard._planets.get(i)._otherUnits){
+                    theBoard._planets.get(i)._owner = 1;
+                }
+                if (theBoard._planets.get(i)._myUnits < theBoard._planets.get(i)._otherUnits){
+                    theBoard._planets.get(i)._owner = -1;
+                }
             }
 
             // Write an action using System.out.println()
