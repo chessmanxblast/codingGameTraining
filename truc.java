@@ -55,7 +55,7 @@ class Player {
                 iBoard._groupAndWeight.put(iGroupName,iBoard._groupAndWeight.get(iGroupName)+1);
             }
 
-            //System.err.println("planet "+iPlanetId+" is of group "+iGroupName);
+            System.err.println("planet "+iPlanetId+" is of group "+iGroupName);
             for (int j = 0; j < planetToCheck._neighbors.size(); j++) {
                 Planet neighbour = planetToCheck._neighbors.get(j);
                 if (planetToCheck._neighbors.get(j)._pocketGroupName==-1
@@ -261,18 +261,21 @@ class Player {
                     Planet planetToCheck = theBoard._planets.get(i);
 
                     if (planetToCheck._pocketGroupName==bestGroupName
+                            && bestGroupName!=-1
                             && planetToCheck._distanceFromClosestEnemy < DistClosestNeigbourhsEquidistant) {
                         DistClosestNeigbourhsEquidistant = planetToCheck._distanceFromClosestEnemy;
                         StrategicPoint = planetToCheck._id;
                     }
                 }
-            }
-            System.err.println("toto 3 "+StrategicPoint);
-            int theTmpStrategicPoint=StrategicPoint;
-            //real strategic point is in fact the entry to the pocket: the one not in the group
-            for (int j = 0; j < theBoard._planets.get(theTmpStrategicPoint)._neighbors.size(); j++) {
-                if (theBoard._planets.get(theTmpStrategicPoint)._neighbors.get(j)._pocketGroupName==-1) {
-                    StrategicPoint=theBoard._planets.get(theTmpStrategicPoint)._neighbors.get(j)._id;
+
+                if (StrategicPoint!=-1) {
+                    int theTmpStrategicPoint = StrategicPoint;
+                    //real strategic point is in fact the entry to the pocket: the one not in the group
+                    for (int j = 0; j < theBoard._planets.get(theTmpStrategicPoint)._neighbors.size(); j++) {
+                        if (theBoard._planets.get(theTmpStrategicPoint)._neighbors.get(j)._pocketGroupName == -1) {
+                            StrategicPoint = theBoard._planets.get(theTmpStrategicPoint)._neighbors.get(j)._id;
+                        }
+                    }
                 }
             }
 
@@ -396,6 +399,13 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                     // the closest the distance from enemy, the better, while we are in the attack phase
                     theBoard._planets.get(i)._ranking = 45-theBoard._planets.get(i)._distanceFromStrategicPoint;
                 }
+                else if (StrategicPoint!=-1
+                        && theBoard._planets.get(StrategicPoint)._owner==1
+                        && theBoard._planets.get(i)._distanceFromStrategicPoint==1
+                        && theBoard._planets.get(i)._owner==0) {
+                    // the closest the distance from enemy, the better, while we are in the attack phase
+                    theBoard._planets.get(i)._ranking = 45;
+                }
                 else if (closestDistanceBetweenUsAndEnemy>1
                         && theBoard._planets.get(i)._owner==0) {
                     // the closest the distance from enemy, the better, while we are in the attack phase
@@ -418,7 +428,8 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                     theBoard._planets.get(i)._ranking = 20;
                 }
 
-                if (theBoard._planets.get(i)._numberOfFriendNeighbors>=theBoard._planets.get(i)._numberOfEnemyNeighbors
+                if (!(StrategicPoint!=-1 && theBoard._planets.get(StrategicPoint)._distanceFromClosestFriend>1)
+                        &&theBoard._planets.get(i)._numberOfFriendNeighbors>=theBoard._planets.get(i)._numberOfEnemyNeighbors
                         && theBoard._planets.get(i)._myUnits<=theBoard._planets.get(i)._otherUnits+5
                         && theBoard._planets.get(i)._distanceFromClosestEnemy==1) {
                     theBoard._planets.get(i)._ranking+=10;
@@ -427,6 +438,7 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                 }
 
                 if (i == StrategicPoint
+                            && (theBoard._planets.get(i)._owner!=1 || theBoard._planets.get(i)._distanceFromClosestEnemy==1)
                             && theBoard._planets.get(i)._myUnits<=theBoard._planets.get(i)._otherUnits+5) {
                     theBoard._planets.get(i)._nbNeededUnitsToFeelSafe=5;
                     theBoard._planets.get(i)._ranking+=100;
@@ -471,25 +483,22 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
 
 
                 boolean specialAttackUsed=false;
-                Planet theStrategicPointPlanet=theBoard._planets.get(StrategicPoint);
-                System.err.println("toto 1 "+theStrategicPointPlanet._canAssign);
-                System.err.println("toto 1b "+theStrategicPointPlanet._distanceFromClosestFriend);
-                if (theStrategicPointPlanet._distanceFromClosestFriend==1
-                            && theStrategicPointPlanet._canAssign==0){
+                if (StrategicPoint!=-1) {
+                    Planet theStrategicPointPlanet = theBoard._planets.get(StrategicPoint);
+                    if (theStrategicPointPlanet._distanceFromClosestFriend == 1
+                            && theStrategicPointPlanet._canAssign == 0) {
 
-                    System.err.println("toto 2 ");
-                    //special case: strategic point is not assignable but we control the neighbour, let's spread from neighbour
-                    for (int j = 0; j < theStrategicPointPlanet._neighbors.size() && !specialAttackUsed; j++) {
-                        System.err.println("toto 3 ");
-                        if (theStrategicPointPlanet._neighbors.get(j)._canAssign==1) {
-                            System.err.println("toto 4 ");
-                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
-                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
-                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
-                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
-                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
-                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
-                            specialAttackUsed=true;
+                        //special case: strategic point is not assignable but we control the neighbour, let's spread from neighbour
+                        for (int j = 0; j < theStrategicPointPlanet._neighbors.size() && !specialAttackUsed; j++) {
+                            if (theStrategicPointPlanet._neighbors.get(j)._canAssign == 1) {
+                                System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                                System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                                System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                                System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                                System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                                System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                                specialAttackUsed = true;
+                            }
                         }
                     }
                 }
@@ -513,7 +522,7 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                     for (int k = 0; k < bestPlanetToTarget.size(); k++) {
                         Planet theCurrentPlanet = theBoard._planets.get(bestPlanetToTarget.get(k));
 
-                        if (theCurrentPlanet._distanceFromClosestEnemy==1){
+                        if (theCurrentPlanet._distanceFromClosestEnemy<=1){
                             for (int i = 0; i < 5 && nbUnitsAlreadySent < 5; i++) {
                                 System.out.println(bestPlanetToTarget.get(k));
                                 nbUnitsAlreadySent++;
