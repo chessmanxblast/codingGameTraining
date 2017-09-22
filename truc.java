@@ -146,8 +146,8 @@ class Player {
 
             }
 
-            //friend distance, calculated only at first round
-            if(nbTurn==0){
+            //friend distance
+            if(true){
                 //calculate distances from friend
                 for (int i = 0; i < planetCount; i++) {
                     //reset _distanceFromClosestFriend
@@ -265,6 +265,14 @@ class Player {
                         DistClosestNeigbourhsEquidistant = planetToCheck._distanceFromClosestEnemy;
                         StrategicPoint = planetToCheck._id;
                     }
+                }
+            }
+            System.err.println("toto 3 "+StrategicPoint);
+            int theTmpStrategicPoint=StrategicPoint;
+            //real strategic point is in fact the entry to the pocket: the one not in the group
+            for (int j = 0; j < theBoard._planets.get(theTmpStrategicPoint)._neighbors.size(); j++) {
+                if (theBoard._planets.get(theTmpStrategicPoint)._neighbors.get(j)._pocketGroupName==-1) {
+                    StrategicPoint=theBoard._planets.get(theTmpStrategicPoint)._neighbors.get(j)._id;
                 }
             }
 
@@ -462,7 +470,33 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                 System.err.println("topBestPlanetToTarget : " + topBestPlanetToTarget + " at distance " + theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy);
 
 
-                if (/*false*/theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy > 3
+                boolean specialAttackUsed=false;
+                Planet theStrategicPointPlanet=theBoard._planets.get(StrategicPoint);
+                System.err.println("toto 1 "+theStrategicPointPlanet._canAssign);
+                System.err.println("toto 1b "+theStrategicPointPlanet._distanceFromClosestFriend);
+                if (theStrategicPointPlanet._distanceFromClosestFriend==1
+                            && theStrategicPointPlanet._canAssign==0){
+
+                    System.err.println("toto 2 ");
+                    //special case: strategic point is not assignable but we control the neighbour, let's spread from neighbour
+                    for (int j = 0; j < theStrategicPointPlanet._neighbors.size() && !specialAttackUsed; j++) {
+                        System.err.println("toto 3 ");
+                        if (theStrategicPointPlanet._neighbors.get(j)._canAssign==1) {
+                            System.err.println("toto 4 ");
+                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                            System.out.println(theStrategicPointPlanet._neighbors.get(j)._id);
+                            specialAttackUsed=true;
+                        }
+                    }
+                }
+
+                if (/*false*/
+                        !specialAttackUsed
+                        && theBoard._planets.get(topBestPlanetToTarget)._distanceFromClosestEnemy > 3
                         && closestDistanceBetweenUsAndEnemy > 1) {
                     //if closest planet from enemy is still far from enemy (closestDistance>1), move the fastest possible to it using spread
                     System.out.println(topBestPlanetToTarget);
@@ -471,7 +505,8 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                     System.out.println(topBestPlanetToTarget);
                     System.out.println(topBestPlanetToTarget);
                     System.out.println(topBestPlanetToTarget);
-                } else {
+                }
+                else if (!specialAttackUsed) {
 
                     int nbUnitsAlreadySent = 0;
                     // send units to each planet until the planet is safe
