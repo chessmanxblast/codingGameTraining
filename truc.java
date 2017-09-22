@@ -377,6 +377,8 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                 }
             }
 
+            int nbTurnsLeft=planetCount-nbTurn;
+
             // get the ranking of each planet
             for (int i = 0; i < planetCount; i++) {
                 //reset _ranking -
@@ -394,6 +396,11 @@ System.err.println("nbTurn: "+nbTurn+" StrategicPoint: " + StrategicPoint);
                     }
                 }
 
+
+                if (theBoard._neutralPlanets.size()>nbTurnsLeft
+                        &&  theBoard._planets.get(i)._owner==0) {
+                    theBoard._planets.get(i)._ranking=60;
+                }
                 if (StrategicPoint!=-1 && closestDistanceBetweenUsAndStrategicPoint>1
                         && theBoard._planets.get(i)._owner==0) {
                     // the closest the distance from enemy, the better, while we are in the attack phase
