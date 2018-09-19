@@ -10,6 +10,8 @@ class Board{
 
 //utils
 
+// toto
+
 //if we do alpha-beta
 
 // if we do genetic algo
