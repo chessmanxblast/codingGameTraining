@@ -7,11 +7,13 @@ import java.lang.Math;
 //constants
 
 //structures
-class Board{
-    //copy function
-    public static Board copyBoard(){
+class Board {
 
+    //copy function
+    public Board copyBoard(){
+        return new Board();
     }
+
     //isEqual function
     int _myHealth;
     int _myMana;
@@ -54,9 +56,13 @@ class Action{
 
 //utils
 class Utils{
-    //measure time since begining of turn and return yes if more than X ms (X constant)
+
+    public static long counter_init = System.currentTimeMillis(); // Timestamp when current turn started in ms
+    public static long max_time_before_abort = 50; // Current Timestamp in ms
+
+    // measure time since beginning of turn and return yes if more than X ms (X constant)
     public static boolean mustAbort() {
-        return true; //change that
+       if (System.currentTimeMillis()>counter_init+max_time_before_abort) return true; return false;
     }
 
     //distance between 2 points. maybe change the return type
@@ -141,6 +147,7 @@ class Player {
             //initialize all entities
             int entityCount = in.nextInt();
             for (int i = 0; i < entityCount; i++) {
+
                 int id = in.nextInt();
                 int type = in.nextInt();
                 int x = in.nextInt();
@@ -177,6 +184,10 @@ class Player {
                 }
 
             }
+
+            // initialize counter
+            Utils.counter_init = System.currentTimeMillis();
+
             for (int i = 0; i < heroesPerPlayer; i++) {
 
                 // Write an action using System.out.println()
@@ -190,6 +201,9 @@ class Player {
                 else {
                     System.out.println("WAIT");
                 }
+
+                System.err.println("Time is: "+ System.currentTimeMillis());
+                System.err.println("Must abort: "+Utils.mustAbort());
             }
         }
     }
