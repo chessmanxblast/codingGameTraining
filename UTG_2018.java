@@ -1,6 +1,7 @@
 import java.util.*;
 import java.io.*;
 import java.math.*;
+import java.lang.Math;
 
 
 //constants
@@ -10,12 +11,43 @@ class Board{
     //copy function
 
     //isEqual function
+    int _myHealth;
+    int _myMana;
+    int _enemyHealth;
+    int _enemyMana;
+    Base myBase;
+    Base enemyBase;
+
+    List<Entity> _spiders;
+    List<Entity> _myHeroes;
+    List<Entity> _enemyHeroes;
+
+
 
 }
 
-class Move{
-    //copy function
+class Entity{
+    int _id;
+    int _type;
+    int _x;
+    int _y;
+    int _shieldLife;
+    int _isControlled;
+    int _health;
+    int _vx;
+    int _vy;
+    int _nearBase;
+    int _threatFor;
+}
 
+class Base{
+    int _x;
+    int _y;
+}
+class Action{
+    int _x;
+    int _y;
+    int _spell;
 }
 
 //utils
@@ -36,7 +68,7 @@ class Utils{
     }
 
     //anticipate 1 turn
-    public static void playOneTurn(Board iBoard, Move iMove){
+    public static void playOneTurn(Board iBoard, Action iAction){
 
     }
 
@@ -71,12 +103,38 @@ class Player {
         int baseY = in.nextInt();
         int heroesPerPlayer = in.nextInt();
 
+        Board theBoard = new Board();
+        Base myBase = new Base();
+        Base enemyBase = new Base();
+        myBase._x = baseX;
+        myBase._y = baseY;
+        enemyBase._x =  Math.abs(baseX - 17630);
+        enemyBase._y =  Math.abs(baseY - 9000);
+
+
         // game loop
         while (true) {
+
+            //initialize lists of your heroes, enemy heroes, spiders
+            theBoard._myHeroes = new ArrayList<Entity>();
+            theBoard._enemyHeroes = new ArrayList<Entity>();
+            theBoard._spiders = new ArrayList<Entity>();
+
+            //define your and enemy's health and mana
             for (int i = 0; i < 2; i++) {
                 int health = in.nextInt();
                 int mana = in.nextInt();
+                if (i==0){
+                    theBoard._myHealth = health;
+                    theBoard._myMana = mana;
+                }
+                else{
+                    theBoard._enemyHealth = health;
+                    theBoard._enemyMana = mana;
+                }
             }
+
+            //initialize all entities
             int entityCount = in.nextInt();
             for (int i = 0; i < entityCount; i++) {
                 int id = in.nextInt();
@@ -90,6 +148,30 @@ class Player {
                 int vy = in.nextInt();
                 int nearBase = in.nextInt();
                 int threatFor = in.nextInt();
+
+                //create entity with attributes given above, add to appropriate list
+                Entity theEntity = new Entity();
+                theEntity._id = id;
+                theEntity._type = type;
+                theEntity._x = x;
+                theEntity._y = y;
+                theEntity._shieldLife = shieldLife;
+                theEntity._isControlled = isControlled;
+                theEntity._health = health;
+                theEntity._vx = vx;
+                theEntity._vy = vy;
+                theEntity._nearBase = nearBase;
+                theEntity._threatFor = threatFor;
+                if (type==0){
+                    theBoard._spiders.add(theEntity);
+                }
+                if (type==1){
+                    theBoard._myHeroes.add(theEntity);
+                }
+                if (type==2){
+                    theBoard._enemyHeroes.add(theEntity);
+                }
+
             }
             for (int i = 0; i < heroesPerPlayer; i++) {
 
