@@ -53,9 +53,19 @@ class Action{
     int _spell;
 
     Action(){}
-    Action(Action iAction){}//todo
+    Action(Action iAction){
+        this._deltaX=iAction._deltaX;
+        this._deltaY=iAction._deltaY;
+        this._spell=iAction._spell;
+    }
     public static Action getRandomAction(Board iBoard){
-        return new Action(); //todo
+        Action result= new Action();
+        int deltaX=Utils.getRandom(800);
+        int deltaY=Utils.getRandom(800);
+        //todo limit to 800 length max
+        result._deltaX=deltaX;
+        result._deltaY=deltaY;
+        return result;
     }
 }
 
@@ -109,12 +119,20 @@ class Utils{
 class Individual {
     long fitness = 0;
     List<Action> genes;
-    int geneLength = 3;
+    int geneLength;
     Board board;
 
-    Individual(){}
+    Individual(){
+        fitness = 0;
+        genes=new ArrayList<Action>();
+        geneLength = 3;
+        Board board=new Board();
+    }
 
     Individual(Board iBoard, int iIndexPopulatedIndividual) {
+        fitness = 0;
+        genes=new ArrayList<Action>();
+        geneLength = 3;
 
         //Set genes randomly for each individual
         board=iBoard.copyBoard();
@@ -172,10 +190,17 @@ class Individual {
 //Population class
 class Population {
 
-    int popSize = 21;
+    int popSize;
     List<Individual> individuals;
-    long fittest = 0;
+    long fittest;
     Board board;
+
+    Population(){
+        popSize = 21;
+        individuals=new ArrayList<Individual>();
+        fittest = 0;
+        board=new Board();
+    }
 
     //Initialize population
     void initializePopulation(Board iBoard) {
@@ -308,7 +333,7 @@ class SimpleDemoGA {
     }
 
     //Selection
-    void selection() { 
+    void selection() {
 
         //Select the most fittest individual
         fittest = population.getFittest().copyWithoutBoard();
@@ -518,6 +543,8 @@ class Player {
 
             // initialize counter
             Utils.counter_init = System.currentTimeMillis();
+
+            Action theBestAction=SimpleDemoGA.demo(theBoard);
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
