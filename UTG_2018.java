@@ -2,6 +2,7 @@ import java.util.*;
 import java.io.*;
 import java.math.*;
 
+
 //constants
 
 //structures
@@ -57,3 +58,47 @@ class Utils{
 
 // if we do genetic algo
 //inspired from https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+class Player {
+
+    public static void main(String args[]) {
+        Scanner in = new Scanner(System.in);
+        int baseX = in.nextInt();
+        int baseY = in.nextInt();
+        int heroesPerPlayer = in.nextInt();
+
+        // game loop
+        while (true) {
+            for (int i = 0; i < 2; i++) {
+                int health = in.nextInt();
+                int mana = in.nextInt();
+            }
+            int entityCount = in.nextInt();
+            for (int i = 0; i < entityCount; i++) {
+                int id = in.nextInt();
+                int type = in.nextInt();
+                int x = in.nextInt();
+                int y = in.nextInt();
+                int shieldLife = in.nextInt();
+                int isControlled = in.nextInt();
+                int health = in.nextInt();
+                int vx = in.nextInt();
+                int vy = in.nextInt();
+                int nearBase = in.nextInt();
+                int threatFor = in.nextInt();
+            }
+            for (int i = 0; i < heroesPerPlayer; i++) {
+
+                // Write an action using System.out.println()
+                // To debug: System.err.println("Debug messages...");
+
+                System.out.println("WAIT");
+            }
+        }
+    }
+}
+
