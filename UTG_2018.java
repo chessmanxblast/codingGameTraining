@@ -87,6 +87,39 @@ class Entity{
     }
 }
 
+class Base{
+    int _x;
+    int _y;
+}
+
+class ActionOf3Heros{
+    List<Action> _3herosAction;
+
+    ActionOf3Heros(){
+        _3herosAction=new ArrayList<Action>();
+    }
+    ActionOf3Heros(ActionOf3Heros iAction){
+        this._3herosAction=new ArrayList<Action>();
+        for (int i = 0; i < iAction._3herosAction.size(); i++) {
+            this._3herosAction.add(iAction._3herosAction.get(i));
+        }
+    }
+
+    public static ActionOf3Heros getRandomActionOf3Heros(Board iBoard){
+        ActionOf3Heros result= new ActionOf3Heros();
+        for (int i = 0; i < 3; i++) {
+            result._3herosAction.add(Action.getRandomAction(iBoard));
+        }
+        return result;
+    }
+
+    public void sendOrder(Board iBoard){
+        for (int i = 0; i < iBoard._myHeroes.size(); i++) {
+            System.out.println("MOVE " + (iBoard._myHeroes.get(i)._x+_3herosAction.get(i)._deltaX)+" " +(iBoard._myHeroes.get(i)._y+_3herosAction.get(i)._deltaY));
+        }
+    }
+}
+
 class Action{
     int _deltaX;
     int _deltaY;
@@ -144,12 +177,12 @@ class Utils{
         return rand.nextInt(iModulo);
     }
 
-
     //anticipate 1 turn
-    public static void playOneTurn(Board iBoard, Action iAction){
+    public static void playOneTurn(Board iBoard, ActionOf3Heros iTripleAction){
         //move heroes, attach nearby spiders
         for (int i = 0; i < iBoard._myHeroes.size(); i++){
             Entity iHero = iBoard._myHeroes.get(i);
+            Action iAction = iTripleAction._3herosAction.get(i);
             iHero._x += iAction._deltaX;
             iHero._y += iAction._deltaY;
             //check to see if any spider is within 800 from said hero, if so do 2 damage, gain 2 mana
@@ -236,20 +269,20 @@ class Utils{
 //Individual class
 class Individual {
     long fitness = 0;
-    List<Action> genes;
+    List<ActionOf3Heros> genes;
     int geneLength;
     Board board;
 
     Individual(){
         fitness = 0;
-        genes=new ArrayList<Action>();
+        genes=new ArrayList<ActionOf3Heros>();
         geneLength = 3;
         Board board=new Board();
     }
 
     Individual(Board iBoard, int iIndexPopulatedIndividual) {
         fitness = 0;
-        genes=new ArrayList<Action>();
+        genes=new ArrayList<ActionOf3Heros>();
         geneLength = 3;
 
         //Set genes randomly for each individual
@@ -258,7 +291,7 @@ class Individual {
         long cumulatedFitness=0;
 
         for (int i=0;i<geneLength;i++){
-            Action aRandomAction=Action.getRandomAction(board);
+            ActionOf3Heros aRandomAction=ActionOf3Heros.getRandomActionOf3Heros(board);
 
             genes.add(aRandomAction);
             Utils.playOneTurn(board,genes.get(i));
@@ -279,7 +312,7 @@ class Individual {
         result.fitness=fitness;
         result.geneLength=geneLength;
         for (int i=0;i<geneLength;i++){
-            result.genes.add(new Action(genes.get(i)));
+            result.genes.add(new ActionOf3Heros(genes.get(i)));
         }
         return result;
     }
@@ -298,7 +331,10 @@ class Individual {
     void print(String iPrefix){
         System.err.println(iPrefix+"if:"+fitness+" gl:"+geneLength+" g:");
         for(int i=0;i<genes.size();i++){
-            System.err.println(genes.get(i)._deltaX+" "+genes.get(i)._deltaY+" ");
+            ActionOf3Heros theAction3Heroes=genes.get(i);
+            for(int j=0;j<theAction3Heroes._3herosAction.size();j++) {
+                System.err.println(theAction3Heroes._3herosAction.get(j)._deltaX + " " + theAction3Heroes._3herosAction.get(j)._deltaY + " ");
+            }
         }
         System.err.println();
     }
@@ -382,7 +418,7 @@ class SimpleDemoGA {
     Individual secondFittest;
     int generationCount = 0;
 
-    static Action demo(Board iBoard) {
+    static ActionOf3Heros demo(Board iBoard) {
         SimpleDemoGA demo = new SimpleDemoGA();
 
         //Initialize population
@@ -495,7 +531,7 @@ class SimpleDemoGA {
             }
             secondFittestCrossoveredGenes.add(crossOverPointSecondFittest);
 
-            Action temp = fittest.genes.get(crossOverPointFittest);
+            ActionOf3Heros temp = fittest.genes.get(crossOverPointFittest);
             fittest.genes.set(crossOverPointFittest,secondFittest.genes.get(crossOverPointSecondFittest));
             secondFittest.genes.set(crossOverPointSecondFittest,temp);
         }
@@ -522,32 +558,33 @@ class SimpleDemoGA {
     //Mutation
     void mutation() {
 
+        for(int i=0;i<3;i++) {
+            //Select a random mutation point
+            int mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
+            int mutationImpactX = Utils.getRandom(10) - 5;
+            int mutationImpactY = Utils.getRandom(10) - 5;
 
-        //Select a random mutation point
-        int mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
-        int mutationImpactX = Utils.getRandom(10)-5;
-        int mutationImpactY = Utils.getRandom(10)-5;
+            //slightly modify values at the mutation point
+            /*if (fittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
+                fittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
+            }
+            if (fittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
+            fittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaX += mutationImpactX;
+            fittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaY += mutationImpactY; 
+            /*}*/
 
-        //slightly modify values at the mutation point
-        /*if (fittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
-            fittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
+            mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
+            mutationImpactX = Utils.getRandom(10) - 5;
+            mutationImpactY = Utils.getRandom(10) - 5;
+
+            /*if (secondFittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
+                secondFittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
+            }
+            if (secondFittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
+            secondFittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaX += mutationImpactX;
+            secondFittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaY += mutationImpactY;
+            /*}*/
         }
-        if (fittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
-            fittest.genes.get(mutationPoint)._deltaX+=mutationImpactX;
-            fittest.genes.get(mutationPoint)._deltaY+=mutationImpactY;
-        /*}*/
-
-        mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
-        mutationImpactX = Utils.getRandom(10)-5;
-        mutationImpactY = Utils.getRandom(10)-5;
-
-        /*if (secondFittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
-            secondFittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
-        }
-        if (secondFittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
-            secondFittest.genes.get(mutationPoint)._deltaX+=mutationImpactX;
-            secondFittest.genes.get(mutationPoint)._deltaY+=mutationImpactY;
-        /*}*/
     }
 
     //Get fittest offspring
@@ -659,18 +696,17 @@ class Player {
 
             // initialize counter
             Utils.counter_init = System.currentTimeMillis();
-            System.err.println("Eval1 is: "+ Utils.evalBoard(theBoard));
+            System.err.println("Eval before is: "+ Utils.evalBoard(theBoard));
 
             Utils.G_NbIndividualsAnalysed=0;
-            Action theBestAction=SimpleDemoGA.demo(theBoard);
+            ActionOf3Heros theBestAction=SimpleDemoGA.demo(theBoard);
             System.err.println("G_NbIndividualsAnalysed: "+Utils.G_NbIndividualsAnalysed);
 
             theBestAction.sendOrder(theBoard);
-            System.err.println("Eval2 is: "+ Utils.evalBoard(theBoard));
+            System.err.println("Eval after is: "+ Utils.evalBoard(theBoard));
 
-            System.err.println("Time is: "+ System.currentTimeMillis());
+            System.err.println("Time spent is: "+ (System.currentTimeMillis()-Utils.counter_init));
             System.err.println("Must abort: "+Utils.mustAbort());
-            //Action theBestAction=SimpleDemoGA.demo(theBoard);
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
