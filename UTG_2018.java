@@ -9,7 +9,9 @@ import java.lang.Math;
 //structures
 class Board{
     //copy function
+    public static Board copyBoard(){
 
+    }
     //isEqual function
     int _myHealth;
     int _myMana;
@@ -180,8 +182,14 @@ class Player {
                 // Write an action using System.out.println()
                 // To debug: System.err.println("Debug messages...");
 
-                System.out.println("WAIT");
-                System.err.println("Random 0-100 nb: "+ Utils.getRandom(100));
+                if (theBoard._spiders.size()==0){
+                    System.out.println("MOVE 4800 1300");
+                    System.out.println("MOVE 3500 3500");
+                    System.out.println("MOVE 1300 4800");
+                }
+                else {
+                    System.out.println("WAIT");
+                }
             }
         }
     }
