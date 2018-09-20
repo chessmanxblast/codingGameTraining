@@ -7,26 +7,47 @@ import java.lang.Math;
 //constants
 
 //structures
-class Board {
-
-    //copy function
-    public Board copyBoard(){
-        return new Board();
-    }
+class Board{
     //isEqual function
     int _myHealth;
     int _myMana;
     int _enemyHealth;
     int _enemyMana;
-    Base myBase;
-    Base enemyBase;
+    Base _myBase;
+    Base _enemyBase;
 
     List<Entity> _spiders;
     List<Entity> _myHeroes;
     List<Entity> _enemyHeroes;
 
+    //copy function
+    public Board copyBoard() {
+        Board copyBoard = new Board();
+        copyBoard._myHealth = _myHealth;
+        copyBoard._myMana = _myMana;
+        copyBoard._enemyHealth = _enemyHealth;
+        copyBoard._enemyMana = _enemyMana;
 
+        copyBoard._myBase = _myBase;
+        copyBoard._enemyBase = _enemyBase;
 
+        for (int i = 0; i < _spiders.size(); i++) {
+            Entity spiderCopy = _spiders.get(i).copyEntity();
+            copyBoard._spiders.add(spiderCopy);
+        }
+
+        for (int i = 0; i < _myHeroes.size(); i++) {
+            Entity heroCopy = _myHeroes.get(i).copyEntity();
+            copyBoard._myHeroes.add(heroCopy);
+        }
+
+        for (int i = 0; i < _enemyHeroes.size(); i++) {
+            Entity heroCopy = _enemyHeroes.get(i).copyEntity();
+            copyBoard._enemyHeroes.add(heroCopy);
+        }
+
+        return copyBoard;
+    }
 }
 
 class Entity{
@@ -41,6 +62,21 @@ class Entity{
     int _vy;
     int _nearBase;
     int _threatFor;
+    public Entity copyEntity(){
+        Entity copyEntity = new Entity();
+        copyEntity._id = _id;
+        copyEntity._type = _type;
+        copyEntity._x = _x;
+        copyEntity._y = _y;
+        copyEntity._shieldLife = _shieldLife;
+        copyEntity._isControlled = _isControlled;
+        copyEntity._health = _health;
+        copyEntity._vx = _vx;
+        copyEntity._vy = _vy;
+        copyEntity._nearBase = _nearBase;
+        copyEntity._threatFor = _threatFor;
+        return copyEntity;
+    }
 }
 
 class Base{
@@ -474,8 +510,8 @@ class Player {
         Base enemyBase = new Base();
         myBase._x = baseX;
         myBase._y = baseY;
-        enemyBase._x =  Math.abs(baseX - 17630);
-        enemyBase._y =  Math.abs(baseY - 9000);
+        enemyBase._x = Math.abs(baseX - 17630);
+        enemyBase._y = Math.abs(baseY - 9000);
 
 
         // game loop
@@ -490,11 +526,10 @@ class Player {
             for (int i = 0; i < 2; i++) {
                 int health = in.nextInt();
                 int mana = in.nextInt();
-                if (i==0){
+                if (i == 0) {
                     theBoard._myHealth = health;
                     theBoard._myMana = mana;
-                }
-                else{
+                } else {
                     theBoard._enemyHealth = health;
                     theBoard._enemyMana = mana;
                 }
@@ -529,13 +564,13 @@ class Player {
                 theEntity._vy = vy;
                 theEntity._nearBase = nearBase;
                 theEntity._threatFor = threatFor;
-                if (type==0){
+                if (type == 0) {
                     theBoard._spiders.add(theEntity);
                 }
-                if (type==1){
+                if (type == 1) {
                     theBoard._myHeroes.add(theEntity);
                 }
-                if (type==2){
+                if (type == 2) {
                     theBoard._enemyHeroes.add(theEntity);
                 }
 
@@ -551,6 +586,7 @@ class Player {
                 // Write an action using System.out.println()
                 // To debug: System.err.println("Debug messages...");
 
+
                 if (theBoard._spiders.size()==0){
                     System.out.println("MOVE 4800 1300");
                     System.out.println("MOVE 3500 3500");
@@ -560,10 +596,10 @@ class Player {
                     System.out.println("WAIT");
                 }
 
+
                 System.err.println("Time is: "+ System.currentTimeMillis());
                 System.err.println("Must abort: "+Utils.mustAbort());
             }
         }
     }
 }
-
