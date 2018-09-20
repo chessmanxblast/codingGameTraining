@@ -28,6 +28,7 @@ class Board{
         copyBoard._enemyHealth = _enemyHealth;
         copyBoard._enemyMana = _enemyMana;
 
+
         copyBoard._myBase = _myBase;
         copyBoard._enemyBase = _enemyBase;
 
@@ -107,8 +108,10 @@ class Utils{
     }
 
     //distance between 2 points. maybe change the return type
-    public static int distance() {
-        return 0;//change that
+    public static double distance(Entity a, Entity b) {
+        double v=(a._x-b._x)*(a._x-b._x)+(a._y-b._y)*(a._y-b._y);
+        double d = Math.sqrt(v);
+        return d;
     }
 
     //random function, return between 0 and iModulo
@@ -123,17 +126,23 @@ class Utils{
 
     }
 
-    //evaluation function of 1 player
-    public static int  evalPlayer(Board iBoard, boolean isMe){
-        return 0;//change that
-    }
-
     public static long evalBoard(Board iBoard){
-        long result=0;
-        result+=evalPlayer(iBoard, true);
-        result-=evalPlayer(iBoard, false);
 
-        return result;
+        long result=0;
+
+        // proximity between heroes and monsters is good!
+        List<Entity> listOfSpiders = iBoard._spiders;
+        List<Entity> listOfMyHeroes = iBoard._myHeroes;
+        for (int i = 0; i < listOfMyHeroes.size(); i++) {
+            for (int j = 0; j < listOfSpiders.size(); j++) {
+                // Entity heroCopy = listOfMyHeroes.get(i);
+                // copyBoard._enemyHeroes.add(heroCopy);
+                System.err.println("Hero ID: " + i +" Spider ID: "+j);
+                result += Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
+            }
+        }
+
+        return -result;
     }
 }
 
@@ -569,9 +578,9 @@ class Player {
                     System.out.println("WAIT");
                 }
 
-
-                System.err.println("Time is: "+ System.currentTimeMillis());
-                System.err.println("Must abort: "+Utils.mustAbort());
+                System.err.println("Eval is: "+ Utils.evalBoard(theBoard));
+                // System.err.println("Time is: "+ System.currentTimeMillis());
+                // System.err.println("Must abort: "+Utils.mustAbort());
             }
         }
     }
