@@ -164,23 +164,28 @@ class Utils{
 
     public static long evalBoard(Board iBoard){
 
-        long result=0;
+        long result=0; int weight_nearbase=10; int factor=1;
         double min_distance_with_spider_for_this_hero=0;
         double distance_with_spider=0;
 
-        // proximity between heroes and monsters is good!
+        // proximity between our heroes and threatening spiders is good!
         List<Entity> listOfSpiders = iBoard._spiders;
         List<Entity> listOfMyHeroes = iBoard._myHeroes;
         for (int i = 0; i < listOfMyHeroes.size(); i++) {
             min_distance_with_spider_for_this_hero=Double.MAX_VALUE;
             for (int j = 0; j < listOfSpiders.size(); j++) {
-                distance_with_spider=Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
-                if (distance_with_spider<min_distance_with_spider_for_this_hero) {
-                    min_distance_with_spider_for_this_hero=distance_with_spider;
+                if (listOfSpiders.get(j)._threatFor==1) {
+
+                    // 10* more important for spiders targeting our base
+                    if (listOfSpiders.get(j)._nearBase==1) factor=10; else factor =1;
+                    distance_with_spider=factor*Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
+                    if (distance_with_spider<min_distance_with_spider_for_this_hero) {
+                        min_distance_with_spider_for_this_hero=distance_with_spider;
+                    }
+                    //System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
+                    // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
                 }
-                //System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
-                // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
-                }
+            }
 
             result += min_distance_with_spider_for_this_hero;
         }
