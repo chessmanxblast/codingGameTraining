@@ -562,7 +562,7 @@ class SimpleDemoGA {
             }
             if (fittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
             fittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaX += mutationImpactX;
-            fittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaY += mutationImpactY; 
+            fittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaY += mutationImpactY;
             /*}*/
 
             mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
