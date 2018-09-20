@@ -13,8 +13,8 @@ class Board{
     int _myMana;
     int _enemyHealth;
     int _enemyMana;
-    Base _myBase;
-    Base _enemyBase;
+    Entity _myBase;
+    Entity _enemyBase;
     int _spidersKilledThisTurn;
 
     List<Entity> _spiders;
@@ -87,10 +87,6 @@ class Entity{
     }
 }
 
-class Base{
-    int _x;
-    int _y;
-}
 class Action{
     int _deltaX;
     int _deltaY;
@@ -151,13 +147,50 @@ class Utils{
 
     //anticipate 1 turn
     public static void playOneTurn(Board iBoard, Action iAction){
-        for (int i = 0; i < iBoard._spiders.size(); i++) {
-            iBoard._spiders.get(i)._x += iBoard._spiders.get(i)._vx;
-            iBoard._spiders.get(i)._y += iBoard._spiders.get(i)._vy;
+        //move heroes, attach nearby spiders
+        for (int i = 0; i < iBoard._myHeroes.size(); i++){
+            Entity iHero = iBoard._myHeroes.get(i);
+            iHero._x += iAction._deltaX;
+            iHero._y += iAction._deltaY;
+            //check to see if any spider is within 800 from said hero, if so do 2 damage, gain 2 mana
+            for (int j = 0; j < iBoard._spiders.size(); j++) {
+                Entity iSpider = iBoard._spiders.get(j);
+                double distanceFromHero = distance (iSpider, iHero);
+                if (distanceFromHero <=800){
+                    iSpider._health -= 2;
+                    iBoard._myMana +=2;
+                }
+            }
         }
-        for (int i = 0; i < iBoard._myHeroes.size(); i++) {
-            iBoard._myHeroes.get(i)._x += iAction._deltaX;
-            iBoard._myHeroes.get(i)._y += iAction._deltaY;
+
+        for (int i = 0; i < iBoard._spiders.size(); i++) {
+            Entity iSpider = iBoard._spiders.get(i);
+
+            double distanceToBase = distance(iSpider,iBoard._myBase);
+            if (iSpider._nearBase == 0){
+                iSpider._x += iSpider._vx;
+                iSpider._y += iSpider._vy;
+            }
+            if (iSpider._nearBase == 1){
+                iSpider._x = (iBoard._myBase._x - iSpider._x)*400/(int)distanceToBase;
+                iSpider._y = (iBoard._myBase._y - iSpider._y)*400/(int)distanceToBase;
+            }
+
+            distanceToBase = distance(iSpider,iBoard._myBase);
+            //if the spider is within 5000 of base, make it attack base by changing nearBase to 1;
+            if (distanceToBase<=5000){
+                iSpider._nearBase = 1;
+            }
+        }
+
+
+        for (int i = 0; i < iBoard._spiders.size(); i++) {
+            Entity iSpider = iBoard._spiders.get(i);
+
+            double distanceToBase = distance(iSpider,iBoard._myBase);
+            if (distanceToBase<=300) {
+                iBoard._myHealth -= 1;
+            }
         }
 
     }
@@ -552,8 +585,8 @@ class Player {
         int heroesPerPlayer = in.nextInt();
 
         Board theBoard = new Board();
-        Base myBase = new Base();
-        Base enemyBase = new Base();
+        Entity myBase = new Entity();
+        Entity enemyBase = new Entity();
         myBase._x = baseX;
         myBase._y = baseY;
         enemyBase._x = Math.abs(baseX - 17630);
@@ -635,6 +668,7 @@ class Player {
 
             System.err.println("Time is: "+ System.currentTimeMillis());
             System.err.println("Must abort: "+Utils.mustAbort());
+            //Action theBestAction=SimpleDemoGA.demo(theBoard);
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
