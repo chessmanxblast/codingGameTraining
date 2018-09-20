@@ -128,7 +128,7 @@ class Utils{
     public static double distance(Entity a, Entity b) {
         double v=(a._x-b._x)*(a._x-b._x)+(a._y-b._y)*(a._y-b._y);
         double d = Math.sqrt(v);
-        return d;
+        return Math.floor(d);
     }
 
     //random function, return between 0 and iModulo
@@ -154,17 +154,23 @@ class Utils{
     public static long evalBoard(Board iBoard){
 
         long result=0;
+        double min_distance_with_spider_for_this_hero=0;
+        double distance_with_spider=0;
 
         // proximity between heroes and monsters is good!
         List<Entity> listOfSpiders = iBoard._spiders;
         List<Entity> listOfMyHeroes = iBoard._myHeroes;
         for (int i = 0; i < listOfMyHeroes.size(); i++) {
+            min_distance_with_spider_for_this_hero=0;
             for (int j = 0; j < listOfSpiders.size(); j++) {
-                // Entity heroCopy = listOfMyHeroes.get(i);
-                // copyBoard._enemyHeroes.add(heroCopy);
-                System.err.println("Hero ID: " + i +" Spider ID: "+j);
-                result += Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
-            }
+                distance_with_spider=Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
+                if (distance_with_spider<min_distance_with_spider_for_this_hero) {
+                    min_distance_with_spider_for_this_hero=distance_with_spider;
+                }
+                System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
+                }
+
+            result += min_distance_with_spider_for_this_hero;
         }
 
         return -result;
