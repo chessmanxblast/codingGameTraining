@@ -13,7 +13,6 @@ class Board {
     public Board copyBoard(){
         return new Board();
     }
-
     //isEqual function
     int _myHealth;
     int _myMana;
@@ -49,9 +48,15 @@ class Base{
     int _y;
 }
 class Action{
-    int _x;
-    int _y;
+    int _deltaX;
+    int _deltaY;
     int _spell;
+
+    Action(){}
+    Action(Action iAction){}//todo
+    public static Action getRandomAction(Board iBoard){
+        return new Action(); //todo
+    }
 }
 
 //utils
@@ -100,6 +105,332 @@ class Utils{
 
 // if we do genetic algo
 //inspired from https://towardsdatascience.com/introduction-to-genetic-algorithms-including-example-code-e396e98d8bf3
+//Individual class
+class Individual {
+    long fitness = 0;
+    List<Action> genes;
+    int geneLength = 3;
+    Board board;
+
+    Individual(){}
+
+    Individual(Board iBoard, int iIndexPopulatedIndividual) {
+
+        //Set genes randomly for each individual
+        board=iBoard.copyBoard();
+        //to avoid horizon effect, add fitness of intermediate steps with lower weight
+        long cumulatedFitness=0;
+
+        for (int i=0;i<geneLength;i++){
+            Action aRandomAction=Action.getRandomAction(board);
+
+            genes.add(aRandomAction);
+            Utils.playOneTurn(board,genes.get(i));
+            long eval=Utils.evalBoard(board);
+
+            cumulatedFitness+=eval*Math.pow(2, i);
+        }
+
+        fitness = cumulatedFitness;
+        //most interesting print
+        //print();
+    }
+
+
+    Individual copyWithoutBoard() {
+        Individual result = new Individual();
+        //G_NbIndividualsAnalysed++;
+        result.fitness=fitness;
+        result.geneLength=geneLength;
+        for (int i=0;i<geneLength;i++){
+            result.genes.add(new Action(genes.get(i)));
+        }
+        return result;
+    }
+
+    //Calculate fitness
+    void calcFitness() {
+        long cumulatedFitness=0;
+        for(int i=0;i<genes.size();i++){
+            Utils.playOneTurn(board,genes.get(i));
+            cumulatedFitness+=Utils.evalBoard(board)*Math.pow(2, i);
+        }
+        fitness=cumulatedFitness;
+//print();
+    }
+
+    /*void print(string iPrefix=""){
+        cerr<<iPrefix<<"if:"<<fitness<<" gl:"<<geneLength<<" g:";
+        for(int i=0;i<genes.size();i++){
+            cerr<<genes.get(i)._deltaX<<" "<<genes.get(i)._deltaY<<" "<<genes.get(i)._structureToBuild<<" ";
+        }
+
+        cerr<<endl;
+    }*/
+}
+
+//Population class
+class Population {
+
+    int popSize = 21;
+    List<Individual> individuals;
+    long fittest = 0;
+    Board board;
+
+    //Initialize population
+    void initializePopulation(Board iBoard) {
+        board=iBoard;
+        for (int i = 0; i < popSize && !Utils.mustAbort(); i++) {
+            individuals.add(new Individual(board,i));
+            //G_NbIndividualsAnalysed++;
+        }
+    }
+
+
+    //Get the fittest individual
+    Individual getFittest() {
+        long maxFit = Long.MIN_VALUE;
+        int maxFitIndex = 0;
+        for (int i = 0; i < individuals.size(); i++) {
+            if (maxFit <= individuals.get(i).fitness) {
+                maxFit = individuals.get(i).fitness;
+                maxFitIndex = i;
+            }
+        }
+        fittest = individuals.get(maxFitIndex).fitness;
+        return individuals.get(maxFitIndex);
+    }
+
+    //Get the second most fittest individual
+    Individual getSecondFittest() {
+        int maxFit1 = 0;
+        int maxFit2 = 0;
+        for (int i = 0; i < individuals.size(); i++) {
+            if (individuals.get(i).fitness > individuals.get(maxFit1).fitness) {
+                maxFit2 = maxFit1;
+                maxFit1 = i;
+            }
+            else if (individuals.get(i).fitness > individuals.get(maxFit2).fitness) {
+                maxFit2 = i;
+            }
+        }
+        return individuals.get(maxFit2);
+    }
+
+    //Get index of least fittest individual
+    int getLeastFittestIndex() {
+        long minFitVal = Long.MAX_VALUE;
+        int minFitIndex = 0;
+        for (int i = 0; i < individuals.size(); i++) {
+            if (minFitVal >= individuals.get(i).fitness) {
+                minFitVal = individuals.get(i).fitness;
+                minFitIndex = i;
+            }
+        }
+        return minFitIndex;
+    }
+
+}
+
+//Main class
+class SimpleDemoGA {
+
+    Population population = new Population();
+    Individual fittest;
+    Individual secondFittest;
+    int generationCount = 0;
+
+    static Action demo(Board iBoard) {
+        SimpleDemoGA demo = new SimpleDemoGA();
+
+        //Initialize population
+        demo.population.initializePopulation(iBoard);
+
+        //Calculate fitness of each individual is already done within population init. this just initialize the fittest attribute of the pop object
+        demo.population.getFittest();
+
+        // cerr<<"Generation: " << demo.generationCount << " Fittest: " << demo.population.fittest<<endl;
+
+        //While we have time
+        while (!Utils.mustAbort()) {
+            //        while (demo.generationCount<30) {
+            ++demo.generationCount;
+
+            //Do selection
+            demo.selection();
+
+            //if (demo.generationCount<35 && G_DEBUG)cerr<<"after select:"<<endl;
+            //if (demo.generationCount<10)demo.fittest.print();
+            //if (demo.generationCount<35 && G_DEBUG)demo.secondFittest.print();
+            //Do crossover
+            demo.crossover();
+
+
+            //if (demo.generationCount<35 && G_DEBUG)cerr<<"after crossover:"<<endl;
+            //if (demo.generationCount<35 && G_DEBUG)demo.fittest.print();
+            //if (demo.generationCount<35 && G_DEBUG)demo.secondFittest.print();
+
+            //Do mutation under a random probability
+            if (Utils.getRandom(7) < 5) {
+                demo.mutation();
+            }
+
+            //if (demo.generationCount<35 && G_DEBUG)cerr<<"after mutation:"<<endl;
+            //if (demo.generationCount<35 && G_DEBUG)demo.fittest.print();
+            //if (demo.generationCount<35 && G_DEBUG)demo.secondFittest.print();
+
+            //Update fitness values of offspring
+            demo.fittest.board=iBoard.copyBoard();
+            demo.fittest.calcFitness();
+            demo.secondFittest.board=iBoard.copyBoard();
+            demo.secondFittest.calcFitness();
+
+            //if (demo.generationCount<35)demo.fittest.print("fittest after offspring ");
+            //if (demo.generationCount<35)demo.secondFittest.print("secondFittest after offspring ");
+
+            //Add fittest offspring to population
+            demo.addFittestOffspring();
+
+            //if (demo.generationCount<35 && G_DEBUG)cerr<<"new getFittestOffspring():"<<demo.getFittestOffspring().fitness<<endl;
+
+        }
+
+    /*cerr<<"\nSolution found in generation " << demo.generationCount<<endl;
+    cerr<<"Fitness: "<<demo.population.getFittest().fitness<<endl;
+    cerr<<"Genes: "<<endl;
+        for (int i = 0; i < 5; i++) {
+    cerr<<demo.population.getFittest().genes.get(i)<<endl;
+        }
+
+    cerr<<""<<endl;*/
+
+        return demo.population.getFittest().genes.get(0);
+    }
+
+    //Selection
+    void selection() { 
+
+        //Select the most fittest individual
+        fittest = population.getFittest().copyWithoutBoard();
+
+        //Select the second most fittest individual
+        secondFittest = population.getSecondFittest().copyWithoutBoard();
+    }
+
+    //Crossover
+    void crossover() {
+
+
+        //Select a random crossover point
+        //special here: not same point on both
+        //CAREFUL: might not work in other Genetic Algo where some Actions cannot be reordered.
+        int nbCrossOvers=Utils.getRandom(population.individuals.get(0).geneLength);
+        List<Integer> fittestCrossoveredGenes=new ArrayList<Integer>();
+        List<Integer> secondFittestCrossoveredGenes=new ArrayList<Integer>();
+        int nbTries=0;
+        for (int i=0;i<nbCrossOvers;i++) {
+            int crossOverPointFittest = -1;
+            boolean crossOverPointFittestAlreadyCovered=true;
+            nbTries=0;
+            while (crossOverPointFittestAlreadyCovered && nbTries<30) {
+                crossOverPointFittest = Utils.getRandom(population.individuals.get(0).geneLength);
+                nbTries++;
+                if(!fittestCrossoveredGenes.contains(crossOverPointFittest)) {
+                    crossOverPointFittestAlreadyCovered=false;
+                }
+            }
+            fittestCrossoveredGenes.add(crossOverPointFittest);
+
+            int crossOverPointSecondFittest = -1;
+            boolean crossOverPointSecondFittestAlreadyCovered=true;
+            nbTries=0;
+            while (crossOverPointSecondFittestAlreadyCovered && nbTries<30) {
+                crossOverPointSecondFittest = Utils.getRandom(population.individuals.get(0).geneLength);
+                nbTries++;
+                if(!secondFittestCrossoveredGenes.contains(crossOverPointSecondFittest)) {
+                    crossOverPointSecondFittestAlreadyCovered=false;
+                }
+            }
+            secondFittestCrossoveredGenes.add(crossOverPointSecondFittest);
+
+            Action temp = fittest.genes.get(crossOverPointFittest);
+            fittest.genes.set(crossOverPointFittest,secondFittest.genes.get(crossOverPointSecondFittest));
+            secondFittest.genes.set(crossOverPointSecondFittest,temp);
+        }
+
+        //Swap values among parents
+        /*int crossOverPoint = Utils.(population.individuals[0].geneLength);
+        for (int i = crossOverPoint-1; i >= 0; i--) {
+            Action temp = fittest.genes.get(i);
+            fittest.genes.get(i) = secondFittest.genes.get(i);
+            secondFittest.genes.get(i) = temp;
+
+
+            //if only 1 of them is a build, cannot go further (would ruin build preconditions most probably by not touching)
+            if ((fittest.genes.get(i)._structureToBuild!=K_BUILD_NOTHING
+                        && secondFittest.genes.get(i)._structureToBuild==K_BUILD_NOTHING)
+                                ||
+                    (secondFittest.genes.get(i)._structureToBuild!=K_BUILD_NOTHING
+                        && fittest.genes.get(i)._structureToBuild==K_BUILD_NOTHING)) {
+                break;
+            }
+        }*/
+    }
+
+    //Mutation
+    void mutation() {
+
+
+        //Select a random mutation point
+        int mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
+        int mutationImpactX = Utils.getRandom(10)-5;
+        int mutationImpactY = Utils.getRandom(10)-5;
+
+        //slightly modify values at the mutation point
+        /*if (fittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
+            fittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
+        }
+        if (fittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
+            fittest.genes.get(mutationPoint)._deltaX+=mutationImpactX;
+            fittest.genes.get(mutationPoint)._deltaY+=mutationImpactY;
+        /*}*/
+
+        mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
+        mutationImpactX = Utils.getRandom(10)-5;
+        mutationImpactY = Utils.getRandom(10)-5;
+
+        /*if (secondFittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
+            secondFittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
+        }
+        if (secondFittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
+            secondFittest.genes.get(mutationPoint)._deltaX+=mutationImpactX;
+            secondFittest.genes.get(mutationPoint)._deltaY+=mutationImpactY;
+        /*}*/
+    }
+
+    //Get fittest offspring
+    Individual getFittestOffspring() {
+        if (fittest.fitness > secondFittest.fitness) {
+            return fittest;
+        }
+        return secondFittest;
+    }
+
+
+    //Replace least fittest individual from most fittest offspring
+    void addFittestOffspring() {
+
+
+        //Get index of least fit individual
+        int leastFittestIndex = population.getLeastFittestIndex();
+
+        //Replace least fittest individual from most fittest offspring
+        //getFittestOffspring().print();
+        population.individuals.set(leastFittestIndex,getFittestOffspring().copyWithoutBoard());
+        //population.individuals.get(leastFittestIndex).print("offspring ");
+    }
+
+}
 
 /**
  * Auto-generated code below aims at helping you parse
