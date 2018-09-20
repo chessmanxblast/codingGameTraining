@@ -62,10 +62,12 @@ class Utils{
         return 0;//change that
     }
 
-    //random fuction, return between 0 and iModulo
+    //random function, return between 0 and iModulo
     public static int getRandom(int iModulo){
-        return 0;//change that
+        Random rand = new Random();
+        return rand.nextInt(iModulo);
     }
+
 
     //anticipate 1 turn
     public static void playOneTurn(Board iBoard, Action iAction){
@@ -179,6 +181,7 @@ class Player {
                 // To debug: System.err.println("Debug messages...");
 
                 System.out.println("WAIT");
+                System.err.println("Random 0-100 nb: "+ Utils.getRandom(100));
             }
         }
     }
