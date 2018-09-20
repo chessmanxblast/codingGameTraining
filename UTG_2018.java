@@ -15,6 +15,7 @@ class Board{
     int _enemyMana;
     Base _myBase;
     Base _enemyBase;
+    int _spidersKilledThisTurn;
 
     List<Entity> _spiders;
     List<Entity> _myHeroes;
@@ -130,6 +131,14 @@ class Utils{
 
     //anticipate 1 turn
     public static void playOneTurn(Board iBoard, Action iAction){
+        for (int i = 0; i < iBoard._spiders.size(); i++) {
+            iBoard._spiders.get(i)._x += iBoard._spiders.get(i)._vx;
+            iBoard._spiders.get(i)._y += iBoard._spiders.get(i)._vy;
+        }
+        for (int i = 0; i < iBoard._myHeroes.size(); i++) {
+            iBoard._myHeroes.get(i)._x += iAction._deltaX;
+            iBoard._myHeroes.get(i)._y += iAction._deltaY;
+        }
 
     }
 
