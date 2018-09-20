@@ -161,13 +161,13 @@ class Utils{
         List<Entity> listOfSpiders = iBoard._spiders;
         List<Entity> listOfMyHeroes = iBoard._myHeroes;
         for (int i = 0; i < listOfMyHeroes.size(); i++) {
-            min_distance_with_spider_for_this_hero=0;
+            min_distance_with_spider_for_this_hero=Double.MAX_VALUE;
             for (int j = 0; j < listOfSpiders.size(); j++) {
                 distance_with_spider=Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
                 if (distance_with_spider<min_distance_with_spider_for_this_hero) {
                     min_distance_with_spider_for_this_hero=distance_with_spider;
                 }
-                System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
+                // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
                 }
 
             result += min_distance_with_spider_for_this_hero;
