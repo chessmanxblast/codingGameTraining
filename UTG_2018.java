@@ -230,19 +230,24 @@ class Utils{
 
     public static long evalBoard(Board iBoard){
 
-
         long result=0;
+        double min_distance_with_spider_for_this_hero=0;
+        double distance_with_spider=0;
 
         // proximity between heroes and monsters is good!
         List<Entity> listOfSpiders = iBoard._spiders;
         List<Entity> listOfMyHeroes = iBoard._myHeroes;
         for (int i = 0; i < listOfMyHeroes.size(); i++) {
+            min_distance_with_spider_for_this_hero=Double.MAX_VALUE;
             for (int j = 0; j < listOfSpiders.size(); j++) {
-                // Entity heroCopy = listOfMyHeroes.get(i);
-                // copyBoard._enemyHeroes.add(heroCopy);
-                // System.err.println("Hero ID: " + i +" Spider ID: "+j);
-                result += Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
+                distance_with_spider=Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
+                if (distance_with_spider<min_distance_with_spider_for_this_hero) {
+                    min_distance_with_spider_for_this_hero=distance_with_spider;
+                }
+                // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
             }
+
+            result += min_distance_with_spider_for_this_hero;
         }
 
         return -result;
