@@ -15,10 +15,17 @@ class Board{
     int _enemyMana;
     Base _myBase;
     Base _enemyBase;
+    int _spidersKilledThisTurn;
 
     List<Entity> _spiders;
     List<Entity> _myHeroes;
     List<Entity> _enemyHeroes;
+
+    Board(){
+        _spiders=new ArrayList<Entity>();
+        _myHeroes=new ArrayList<Entity>();
+        _enemyHeroes=new ArrayList<Entity>();
+    }
 
     //copy function
     public Board copyBoard() {
@@ -90,9 +97,19 @@ class Action{
     int _spell;
 
     Action(){}
-    Action(Action iAction){}//todo
+    Action(Action iAction){
+        this._deltaX=iAction._deltaX;
+        this._deltaY=iAction._deltaY;
+        this._spell=iAction._spell;
+    }
     public static Action getRandomAction(Board iBoard){
-        return new Action(); //todo
+        Action result= new Action();
+        int deltaX=Utils.getRandom(800);
+        int deltaY=Utils.getRandom(800);
+        //todo limit to 800 length max
+        result._deltaX=deltaX;
+        result._deltaY=deltaY;
+        return result;
     }
 }
 
@@ -123,6 +140,14 @@ class Utils{
 
     //anticipate 1 turn
     public static void playOneTurn(Board iBoard, Action iAction){
+        for (int i = 0; i < iBoard._spiders.size(); i++) {
+            iBoard._spiders.get(i)._x += iBoard._spiders.get(i)._vx;
+            iBoard._spiders.get(i)._y += iBoard._spiders.get(i)._vy;
+        }
+        for (int i = 0; i < iBoard._myHeroes.size(); i++) {
+            iBoard._myHeroes.get(i)._x += iAction._deltaX;
+            iBoard._myHeroes.get(i)._y += iAction._deltaY;
+        }
 
     }
 
@@ -154,12 +179,20 @@ class Utils{
 class Individual {
     long fitness = 0;
     List<Action> genes;
-    int geneLength = 3;
+    int geneLength;
     Board board;
 
-    Individual(){}
+    Individual(){
+        fitness = 0;
+        genes=new ArrayList<Action>();
+        geneLength = 3;
+        Board board=new Board();
+    }
 
     Individual(Board iBoard, int iIndexPopulatedIndividual) {
+        fitness = 0;
+        genes=new ArrayList<Action>();
+        geneLength = 3;
 
         //Set genes randomly for each individual
         board=iBoard.copyBoard();
@@ -201,26 +234,32 @@ class Individual {
             cumulatedFitness+=Utils.evalBoard(board)*Math.pow(2, i);
         }
         fitness=cumulatedFitness;
-//print();
+        //print("");
     }
 
-    /*void print(string iPrefix=""){
-        cerr<<iPrefix<<"if:"<<fitness<<" gl:"<<geneLength<<" g:";
+    void print(String iPrefix){
+        System.err.println(iPrefix+"if:"+fitness+" gl:"+geneLength+" g:");
         for(int i=0;i<genes.size();i++){
-            cerr<<genes.get(i)._deltaX<<" "<<genes.get(i)._deltaY<<" "<<genes.get(i)._structureToBuild<<" ";
+            System.err.println(genes.get(i)._deltaX+" "+genes.get(i)._deltaY+" "+geneLength+" ");
         }
-
-        cerr<<endl;
-    }*/
+        System.err.println();
+    }
 }
 
 //Population class
 class Population {
 
-    int popSize = 21;
+    int popSize;
     List<Individual> individuals;
-    long fittest = 0;
+    long fittest;
     Board board;
+
+    Population(){
+        popSize = 21;
+        individuals=new ArrayList<Individual>();
+        fittest = 0;
+        board=new Board();
+    }
 
     //Initialize population
     void initializePopulation(Board iBoard) {
@@ -562,6 +601,8 @@ class Player {
 
             // initialize counter
             Utils.counter_init = System.currentTimeMillis();
+
+            Action theBestAction=SimpleDemoGA.demo(theBoard);
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
