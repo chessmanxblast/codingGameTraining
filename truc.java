@@ -35,7 +35,7 @@ class Planet{
 }
 
 
-class Player {
+class  Player {
     public static void tagPlanetAndEquidistantNeighbours(Board iBoard,int iPlanetId,int iGroupName) {
         Planet planetToCheck = iBoard._planets.get(iPlanetId);
         boolean hasANeighbourNotEquidistant = false;

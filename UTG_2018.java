@@ -70,6 +70,7 @@ class Entity{
     int _vy;
     int _nearBase;
     int _threatFor;
+    int _isDead;
     public Entity copyEntity(){
         Entity copyEntity = new Entity();
         copyEntity._id = _id;
@@ -87,10 +88,6 @@ class Entity{
     }
 }
 
-class Base{
-    int _x;
-    int _y;
-}
 
 class ActionOf3Heros{
     List<Action> _3herosAction;
@@ -177,14 +174,19 @@ class Utils{
         return rand.nextInt(iModulo);
     }
 
+
     //anticipate 1 turn
     public static void playOneTurn(Board iBoard, ActionOf3Heros iTripleAction){
-        //move heroes, attach nearby spiders
+        iBoard._spidersKilledThisTurn = 0;
+        List<Entity>survivingSpiders = new ArrayList<Entity>();
+
+        //move heroes, attack nearby spiders
         for (int i = 0; i < iBoard._myHeroes.size(); i++){
             Entity iHero = iBoard._myHeroes.get(i);
             Action iAction = iTripleAction._3herosAction.get(i);
             iHero._x += iAction._deltaX;
             iHero._y += iAction._deltaY;
+
             //check to see if any spider is within 800 from said hero, if so do 2 damage, gain 2 mana
             for (int j = 0; j < iBoard._spiders.size(); j++) {
                 Entity iSpider = iBoard._spiders.get(j);
@@ -196,6 +198,7 @@ class Utils{
             }
         }
 
+        //move spiders
         for (int i = 0; i < iBoard._spiders.size(); i++) {
             Entity iSpider = iBoard._spiders.get(i);
 
@@ -209,22 +212,32 @@ class Utils{
                 iSpider._y = (iBoard._myBase._y - iSpider._y)*400/(int)distanceToBase;
             }
 
+            //if the spider is within 5000 of base, make it attack base by changing nearBase to 1
             distanceToBase = distance(iSpider,iBoard._myBase);
-            //if the spider is within 5000 of base, make it attack base by changing nearBase to 1;
             if (distanceToBase<=5000){
                 iSpider._nearBase = 1;
             }
         }
 
-
+        //kill dead spiders, augment spiderskilledthisturn, make surviving spiders attack, replace spider array with array of survivng spiders
         for (int i = 0; i < iBoard._spiders.size(); i++) {
             Entity iSpider = iBoard._spiders.get(i);
-
+            if (iSpider._health < 1){
+                iBoard._spidersKilledThisTurn++;
+                iSpider._isDead = 1;
+            }
             double distanceToBase = distance(iSpider,iBoard._myBase);
-            if (distanceToBase<=300) {
+            if (distanceToBase<=300 && iSpider._isDead == 0) {
                 iBoard._myHealth -= 1;
+                iSpider._isDead = 1;
+            }
+            if (iSpider._isDead == 0){
+                survivingSpiders.add(iSpider);
             }
         }
+
+        //set the spiders of the board = the ones who survived this turn
+        iBoard._spiders = survivingSpiders;
 
     }
 
@@ -622,7 +635,8 @@ class Player {
         myBase._y = baseY;
         enemyBase._x = Math.abs(baseX - 17630);
         enemyBase._y = Math.abs(baseY - 9000);
-        theBoard._myBase=myBase;
+        theBoard._myBase = myBase;
+        theBoard._enemyBase = enemyBase;
 
         // game loop
         while (true) {
@@ -674,6 +688,7 @@ class Player {
                 theEntity._vy = vy;
                 theEntity._nearBase = nearBase;
                 theEntity._threatFor = threatFor;
+                theEntity._isDead = 0;
                 if (type == 0) {
                     theBoard._spiders.add(theEntity);
                 }
