@@ -104,12 +104,22 @@ class Action{
     }
     public static Action getRandomAction(Board iBoard){
         Action result= new Action();
-        int deltaX=Utils.getRandom(800);
-        int deltaY=Utils.getRandom(800);
-        //todo limit to 800 length max
+        int deltaX=800-Utils.getRandom(1600);
+        int deltaY=800-Utils.getRandom(1600);
+        //limit to 800 length max
+        if (deltaX*deltaX+deltaY*deltaY>800*800) {
+            deltaX=deltaX*800/(int)Math.sqrt(deltaX*deltaX+deltaY*deltaY);
+            deltaY=deltaY*800/(int)Math.sqrt(deltaX*deltaX+deltaY*deltaY);
+        }
         result._deltaX=deltaX;
         result._deltaY=deltaY;
         return result;
+    }
+
+    public void sendOrder(Board iBoard){
+        for (int i = 0; i < iBoard._myHeroes.size(); i++) {
+            System.out.println("MOVE " + (iBoard._myHeroes.get(i)._x+_deltaX)+" " +(iBoard._myHeroes.get(i)._y+_deltaY));
+        }
     }
 }
 
@@ -117,7 +127,8 @@ class Action{
 class Utils{
 
     public static long counter_init = System.currentTimeMillis(); // Timestamp when current turn started in ms
-    public static long max_time_before_abort = 50; // Current Timestamp in ms
+    public static long max_time_before_abort = 40; // Current Timestamp in ms
+    public static long G_NbIndividualsAnalysed = 0; //number of nodes analyzed
 
     // measure time since beginning of turn and return yes if more than X ms (X constant)
     public static boolean mustAbort() {
@@ -167,6 +178,7 @@ class Utils{
                 if (distance_with_spider<min_distance_with_spider_for_this_hero) {
                     min_distance_with_spider_for_this_hero=distance_with_spider;
                 }
+                //System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
                 // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
                 }
 
@@ -223,7 +235,7 @@ class Individual {
 
     Individual copyWithoutBoard() {
         Individual result = new Individual();
-        //G_NbIndividualsAnalysed++;
+        Utils.G_NbIndividualsAnalysed++;
         result.fitness=fitness;
         result.geneLength=geneLength;
         for (int i=0;i<geneLength;i++){
@@ -246,7 +258,7 @@ class Individual {
     void print(String iPrefix){
         System.err.println(iPrefix+"if:"+fitness+" gl:"+geneLength+" g:");
         for(int i=0;i<genes.size();i++){
-            System.err.println(genes.get(i)._deltaX+" "+genes.get(i)._deltaY+" "+geneLength+" ");
+            System.err.println(genes.get(i)._deltaX+" "+genes.get(i)._deltaY+" ");
         }
         System.err.println();
     }
@@ -272,7 +284,7 @@ class Population {
         board=iBoard;
         for (int i = 0; i < popSize && !Utils.mustAbort(); i++) {
             individuals.add(new Individual(board,i));
-            //G_NbIndividualsAnalysed++;
+            Utils.G_NbIndividualsAnalysed++;
         }
     }
 
@@ -607,15 +619,24 @@ class Player {
 
             // initialize counter
             Utils.counter_init = System.currentTimeMillis();
+            System.err.println("Eval1 is: "+ Utils.evalBoard(theBoard));
 
+            Utils.G_NbIndividualsAnalysed=0;
             Action theBestAction=SimpleDemoGA.demo(theBoard);
+            System.err.println("G_NbIndividualsAnalysed: "+Utils.G_NbIndividualsAnalysed);
+
+            theBestAction.sendOrder(theBoard);
+            System.err.println("Eval2 is: "+ Utils.evalBoard(theBoard));
+
+            System.err.println("Time is: "+ System.currentTimeMillis());
+            System.err.println("Must abort: "+Utils.mustAbort());
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
                 // Write an action using System.out.println()
                 // To debug: System.err.println("Debug messages...");
 
-
+                /*
                 if (theBoard._spiders.size()==0){
                     System.out.println("MOVE 4800 1300");
                     System.out.println("MOVE 3500 3500");
@@ -624,8 +645,9 @@ class Player {
                 else {
                     System.out.println("WAIT");
                 }
+                */
 
-                System.err.println("Eval is: "+ Utils.evalBoard(theBoard));
+                //System.err.println("Eval is: "+ Utils.evalBoard(theBoard));
                 // System.err.println("Time is: "+ System.currentTimeMillis());
                 // System.err.println("Must abort: "+Utils.mustAbort());
             }
