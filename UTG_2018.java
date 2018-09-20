@@ -198,29 +198,31 @@ class Utils{
     public static long evalBoard(Board iBoard){
 
         long result=0; int weight_nearbase=10; int factor=1;
-        double min_distance_with_spider_for_this_hero=0;
-        double distance_with_spider=0;
+        double weighted_distance=0;
+        double distance_between_spider_and_hero=0;
+        double distance_between_spider_and_base=0;
 
         // proximity between our heroes and threatening spiders is good!
         List<Entity> listOfSpiders = iBoard._spiders;
         List<Entity> listOfMyHeroes = iBoard._myHeroes;
         for (int i = 0; i < listOfMyHeroes.size(); i++) {
-            min_distance_with_spider_for_this_hero=Double.MAX_VALUE;
+            weighted_distance=Double.MAX_VALUE;
             for (int j = 0; j < listOfSpiders.size(); j++) {
                 if (listOfSpiders.get(j)._threatFor==1) {
 
                     // 10* more important for spiders targeting our base
-                    if (listOfSpiders.get(j)._nearBase==1) factor=10; else factor =1;
-                    distance_with_spider=factor*Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
-                    if (distance_with_spider<min_distance_with_spider_for_this_hero) {
-                        min_distance_with_spider_for_this_hero=distance_with_spider;
+                    // if (listOfSpiders.get(j)._nearBase==1) factor=weight_nearbase; else factor =1;
+                    distance_between_spider_and_base=Utils.distance(listOfSpiders.get(j),iBoard._myBase);
+                    distance_between_spider_and_hero=Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
+                    if (distance_between_spider_and_hero*distance_between_spider_and_base<weighted_distance) {
+                        weighted_distance=distance_between_spider_and_hero*distance_between_spider_and_base;
                     }
                     //System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
                     // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
                 }
             }
 
-            result += min_distance_with_spider_for_this_hero;
+            result += weighted_distance*factor;
         }
 
         return -result;
@@ -591,7 +593,7 @@ class Player {
         myBase._y = baseY;
         enemyBase._x = Math.abs(baseX - 17630);
         enemyBase._y = Math.abs(baseY - 9000);
-
+        theBoard._myBase=myBase;
 
         // game loop
         while (true) {
