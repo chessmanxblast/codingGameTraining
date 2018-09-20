@@ -21,6 +21,12 @@ class Board{
     List<Entity> _myHeroes;
     List<Entity> _enemyHeroes;
 
+    Board(){
+        _spiders=new ArrayList<Entity>();
+        _myHeroes=new ArrayList<Entity>();
+        _enemyHeroes=new ArrayList<Entity>();
+    }
+
     //copy function
     public Board copyBoard() {
         Board copyBoard = new Board();
@@ -219,17 +225,16 @@ class Individual {
             cumulatedFitness+=Utils.evalBoard(board)*Math.pow(2, i);
         }
         fitness=cumulatedFitness;
-//print();
+        //print("");
     }
 
-    /*void print(string iPrefix=""){
-        cerr<<iPrefix<<"if:"<<fitness<<" gl:"<<geneLength<<" g:";
+    void print(String iPrefix){
+        System.err.println(iPrefix+"if:"+fitness+" gl:"+geneLength+" g:");
         for(int i=0;i<genes.size();i++){
-            cerr<<genes.get(i)._deltaX<<" "<<genes.get(i)._deltaY<<" "<<genes.get(i)._structureToBuild<<" ";
+            System.err.println(genes.get(i)._deltaX+" "+genes.get(i)._deltaY+" "+geneLength+" ");
         }
-
-        cerr<<endl;
-    }*/
+        System.err.println();
+    }
 }
 
 //Population class
