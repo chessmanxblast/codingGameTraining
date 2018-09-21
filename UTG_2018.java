@@ -70,7 +70,6 @@ class Entity{
     int _vy;
     int _nearBase;
     int _threatFor;
-    int _isDead;
     public Entity copyEntity(){
         Entity copyEntity = new Entity();
         copyEntity._id = _id;
@@ -85,35 +84,6 @@ class Entity{
         copyEntity._nearBase = _nearBase;
         copyEntity._threatFor = _threatFor;
         return copyEntity;
-    }
-}
-
-
-class ActionOf3Heros{
-    List<Action> _3herosAction;
-
-    ActionOf3Heros(){
-        _3herosAction=new ArrayList<Action>();
-    }
-    ActionOf3Heros(ActionOf3Heros iAction){
-        this._3herosAction=new ArrayList<Action>();
-        for (int i = 0; i < iAction._3herosAction.size(); i++) {
-            this._3herosAction.add(iAction._3herosAction.get(i));
-        }
-    }
-
-    public static ActionOf3Heros getRandomActionOf3Heros(Board iBoard){
-        ActionOf3Heros result= new ActionOf3Heros();
-        for (int i = 0; i < 3; i++) {
-            result._3herosAction.add(Action.getRandomAction(iBoard));
-        }
-        return result;
-    }
-
-    public void sendOrder(Board iBoard){
-        for (int i = 0; i < iBoard._myHeroes.size(); i++) {
-            System.out.println("MOVE " + (iBoard._myHeroes.get(i)._x+_3herosAction.get(i)._deltaX)+" " +(iBoard._myHeroes.get(i)._y+_3herosAction.get(i)._deltaY));
-        }
     }
 }
 
@@ -158,7 +128,7 @@ class Utils{
 
     // measure time since beginning of turn and return yes if more than X ms (X constant)
     public static boolean mustAbort() {
-       if (System.currentTimeMillis()>counter_init+max_time_before_abort) return true; return false;
+        if (System.currentTimeMillis()>counter_init+max_time_before_abort) return true; return false;
     }
 
     //distance between 2 points. maybe change the return type
@@ -176,17 +146,12 @@ class Utils{
 
 
     //anticipate 1 turn
-    public static void playOneTurn(Board iBoard, ActionOf3Heros iTripleAction){
-        iBoard._spidersKilledThisTurn = 0;
-        List<Entity>survivingSpiders = new ArrayList<Entity>();
-
-        //move heroes, attack nearby spiders
+    public static void playOneTurn(Board iBoard, Action iAction){
+        //move heroes, attach nearby spiders
         for (int i = 0; i < iBoard._myHeroes.size(); i++){
             Entity iHero = iBoard._myHeroes.get(i);
-            Action iAction = iTripleAction._3herosAction.get(i);
             iHero._x += iAction._deltaX;
             iHero._y += iAction._deltaY;
-
             //check to see if any spider is within 800 from said hero, if so do 2 damage, gain 2 mana
             for (int j = 0; j < iBoard._spiders.size(); j++) {
                 Entity iSpider = iBoard._spiders.get(j);
@@ -198,7 +163,6 @@ class Utils{
             }
         }
 
-        //move spiders
         for (int i = 0; i < iBoard._spiders.size(); i++) {
             Entity iSpider = iBoard._spiders.get(i);
 
@@ -208,59 +172,57 @@ class Utils{
                 iSpider._y += iSpider._vy;
             }
             if (iSpider._nearBase == 1){
-                iSpider._x = (iBoard._myBase._x - iSpider._x)*400/(int)distanceToBase;
-                iSpider._y = (iBoard._myBase._y - iSpider._y)*400/(int)distanceToBase;
+                iSpider._x += (iBoard._myBase._x - iSpider._x)*400/(int)distanceToBase;
+                iSpider._y += (iBoard._myBase._y - iSpider._y)*400/(int)distanceToBase;
             }
 
-            //if the spider is within 5000 of base, make it attack base by changing nearBase to 1
             distanceToBase = distance(iSpider,iBoard._myBase);
+            //if the spider is within 5000 of base, make it attack base by changing nearBase to 1;
             if (distanceToBase<=5000){
                 iSpider._nearBase = 1;
             }
         }
 
-        //kill dead spiders, augment spiderskilledthisturn, make surviving spiders attack, replace spider array with array of survivng spiders
+
         for (int i = 0; i < iBoard._spiders.size(); i++) {
             Entity iSpider = iBoard._spiders.get(i);
-            if (iSpider._health < 1){
-                iBoard._spidersKilledThisTurn++;
-                iSpider._isDead = 1;
-            }
+
             double distanceToBase = distance(iSpider,iBoard._myBase);
-            if (distanceToBase<=300 && iSpider._isDead == 0) {
+            if (distanceToBase<=300) {
                 iBoard._myHealth -= 1;
-                iSpider._isDead = 1;
-            }
-            if (iSpider._isDead == 0){
-                survivingSpiders.add(iSpider);
             }
         }
-
-        //set the spiders of the board = the ones who survived this turn
-        iBoard._spiders = survivingSpiders;
 
     }
 
     public static long evalBoard(Board iBoard){
 
-        long result=0;
-        double min_distance_with_spider_for_this_hero=0;
-        double distance_with_spider=0;
+        long result=0; int weight_nearbase=10; int factor=1;
+        double weighted_distance=0;
+        double distance_between_spider_and_hero=0;
+        double distance_between_spider_and_base=0;
 
-        // proximity between heroes and monsters is good!
+        // proximity between our heroes and threatening spiders is good!
         List<Entity> listOfSpiders = iBoard._spiders;
         List<Entity> listOfMyHeroes = iBoard._myHeroes;
         for (int i = 0; i < listOfMyHeroes.size(); i++) {
-            min_distance_with_spider_for_this_hero=Double.MAX_VALUE;
+            weighted_distance=Double.MAX_VALUE;
             for (int j = 0; j < listOfSpiders.size(); j++) {
-                distance_with_spider=Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
-                if (distance_with_spider<min_distance_with_spider_for_this_hero) {
-                    min_distance_with_spider_for_this_hero=distance_with_spider;
+                if (listOfSpiders.get(j)._threatFor==1) {
+
+                    // 10* more important for spiders targeting our base
+                    // if (listOfSpiders.get(j)._nearBase==1) factor=weight_nearbase; else factor =1;
+                    distance_between_spider_and_base=Utils.distance(listOfSpiders.get(j),iBoard._myBase);
+                    distance_between_spider_and_hero=Utils.distance(listOfMyHeroes.get(i),listOfSpiders.get(j));
+                    if (distance_between_spider_and_hero*distance_between_spider_and_base<weighted_distance) {
+                        weighted_distance=distance_between_spider_and_hero*distance_between_spider_and_base;
+                    }
+                    //System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
+                    // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
                 }
-                // System.err.println("Hero ID: " + i +" Spider ID: "+j + " @ " + distance_with_spider + " units");
             }
 
-            result += min_distance_with_spider_for_this_hero;
+            result += weighted_distance*factor;
         }
 
         return -result;
@@ -274,20 +236,20 @@ class Utils{
 //Individual class
 class Individual {
     long fitness = 0;
-    List<ActionOf3Heros> genes;
+    List<Action> genes;
     int geneLength;
     Board board;
 
     Individual(){
         fitness = 0;
-        genes=new ArrayList<ActionOf3Heros>();
+        genes=new ArrayList<Action>();
         geneLength = 3;
         Board board=new Board();
     }
 
     Individual(Board iBoard, int iIndexPopulatedIndividual) {
         fitness = 0;
-        genes=new ArrayList<ActionOf3Heros>();
+        genes=new ArrayList<Action>();
         geneLength = 3;
 
         //Set genes randomly for each individual
@@ -296,7 +258,7 @@ class Individual {
         long cumulatedFitness=0;
 
         for (int i=0;i<geneLength;i++){
-            ActionOf3Heros aRandomAction=ActionOf3Heros.getRandomActionOf3Heros(board);
+            Action aRandomAction=Action.getRandomAction(board);
 
             genes.add(aRandomAction);
             Utils.playOneTurn(board,genes.get(i));
@@ -317,7 +279,7 @@ class Individual {
         result.fitness=fitness;
         result.geneLength=geneLength;
         for (int i=0;i<geneLength;i++){
-            result.genes.add(new ActionOf3Heros(genes.get(i)));
+            result.genes.add(new Action(genes.get(i)));
         }
         return result;
     }
@@ -336,10 +298,7 @@ class Individual {
     void print(String iPrefix){
         System.err.println(iPrefix+"if:"+fitness+" gl:"+geneLength+" g:");
         for(int i=0;i<genes.size();i++){
-            ActionOf3Heros theAction3Heroes=genes.get(i);
-            for(int j=0;j<theAction3Heroes._3herosAction.size();j++) {
-                System.err.println(theAction3Heroes._3herosAction.get(j)._deltaX + " " + theAction3Heroes._3herosAction.get(j)._deltaY + " ");
-            }
+            System.err.println(genes.get(i)._deltaX+" "+genes.get(i)._deltaY+" ");
         }
         System.err.println();
     }
@@ -423,7 +382,7 @@ class SimpleDemoGA {
     Individual secondFittest;
     int generationCount = 0;
 
-    static ActionOf3Heros demo(Board iBoard) {
+    static Action demo(Board iBoard) {
         SimpleDemoGA demo = new SimpleDemoGA();
 
         //Initialize population
@@ -484,7 +443,6 @@ class SimpleDemoGA {
         for (int i = 0; i < 5; i++) {
     cerr<<demo.population.getFittest().genes.get(i)<<endl;
         }
-
     cerr<<""<<endl;*/
 
         return demo.population.getFittest().genes.get(0);
@@ -536,7 +494,7 @@ class SimpleDemoGA {
             }
             secondFittestCrossoveredGenes.add(crossOverPointSecondFittest);
 
-            ActionOf3Heros temp = fittest.genes.get(crossOverPointFittest);
+            Action temp = fittest.genes.get(crossOverPointFittest);
             fittest.genes.set(crossOverPointFittest,secondFittest.genes.get(crossOverPointSecondFittest));
             secondFittest.genes.set(crossOverPointSecondFittest,temp);
         }
@@ -547,8 +505,6 @@ class SimpleDemoGA {
             Action temp = fittest.genes.get(i);
             fittest.genes.get(i) = secondFittest.genes.get(i);
             secondFittest.genes.get(i) = temp;
-
-
             //if only 1 of them is a build, cannot go further (would ruin build preconditions most probably by not touching)
             if ((fittest.genes.get(i)._structureToBuild!=K_BUILD_NOTHING
                         && secondFittest.genes.get(i)._structureToBuild==K_BUILD_NOTHING)
@@ -563,33 +519,32 @@ class SimpleDemoGA {
     //Mutation
     void mutation() {
 
-        for(int i=0;i<3;i++) {
-            //Select a random mutation point
-            int mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
-            int mutationImpactX = Utils.getRandom(10) - 5;
-            int mutationImpactY = Utils.getRandom(10) - 5;
 
-            //slightly modify values at the mutation point
-            /*if (fittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
-                fittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
-            }
-            if (fittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
-            fittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaX += mutationImpactX;
-            fittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaY += mutationImpactY;
-            /*}*/
+        //Select a random mutation point
+        int mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
+        int mutationImpactX = Utils.getRandom(10)-5;
+        int mutationImpactY = Utils.getRandom(10)-5;
 
-            mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
-            mutationImpactX = Utils.getRandom(10) - 5;
-            mutationImpactY = Utils.getRandom(10) - 5;
-
-            /*if (secondFittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
-                secondFittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
-            }
-            if (secondFittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
-            secondFittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaX += mutationImpactX;
-            secondFittest.genes.get(mutationPoint)._3herosAction.get(i)._deltaY += mutationImpactY;
-            /*}*/
+        //slightly modify values at the mutation point
+        /*if (fittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
+            fittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
         }
+        if (fittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
+        fittest.genes.get(mutationPoint)._deltaX+=mutationImpactX;
+        fittest.genes.get(mutationPoint)._deltaY+=mutationImpactY;
+        /*}*/
+
+        mutationPoint = Utils.getRandom(population.individuals.get(0).geneLength);
+        mutationImpactX = Utils.getRandom(10)-5;
+        mutationImpactY = Utils.getRandom(10)-5;
+
+        /*if (secondFittest.genes.get(mutationPoint)._structureToBuild!=K_BUILD_NOTHING) {
+            secondFittest.genes.get(mutationPoint)._structureToBuild=Utils.getRandom(6);
+        }
+        if (secondFittest.genes.get(mutationPoint)._structureToBuild==K_BUILD_NOTHING) {*/
+        secondFittest.genes.get(mutationPoint)._deltaX+=mutationImpactX;
+        secondFittest.genes.get(mutationPoint)._deltaY+=mutationImpactY;
+        /*}*/
     }
 
     //Get fittest offspring
@@ -635,8 +590,7 @@ class Player {
         myBase._y = baseY;
         enemyBase._x = Math.abs(baseX - 17630);
         enemyBase._y = Math.abs(baseY - 9000);
-        theBoard._myBase = myBase;
-        theBoard._enemyBase = enemyBase;
+        theBoard._myBase=myBase;
 
         // game loop
         while (true) {
@@ -688,7 +642,6 @@ class Player {
                 theEntity._vy = vy;
                 theEntity._nearBase = nearBase;
                 theEntity._threatFor = threatFor;
-                theEntity._isDead = 0;
                 if (type == 0) {
                     theBoard._spiders.add(theEntity);
                 }
@@ -703,17 +656,18 @@ class Player {
 
             // initialize counter
             Utils.counter_init = System.currentTimeMillis();
-            System.err.println("Eval before is: "+ Utils.evalBoard(theBoard));
+            System.err.println("Eval1 is: "+ Utils.evalBoard(theBoard));
 
             Utils.G_NbIndividualsAnalysed=0;
-            ActionOf3Heros theBestAction=SimpleDemoGA.demo(theBoard);
+            Action theBestAction=SimpleDemoGA.demo(theBoard);
             System.err.println("G_NbIndividualsAnalysed: "+Utils.G_NbIndividualsAnalysed);
 
             theBestAction.sendOrder(theBoard);
-            System.err.println("Eval after is: "+ Utils.evalBoard(theBoard));
+            System.err.println("Eval2 is: "+ Utils.evalBoard(theBoard));
 
-            System.err.println("Time spent is: "+ (System.currentTimeMillis()-Utils.counter_init));
+            System.err.println("Time is: "+ System.currentTimeMillis());
             System.err.println("Must abort: "+Utils.mustAbort());
+            //Action theBestAction=SimpleDemoGA.demo(theBoard);
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
