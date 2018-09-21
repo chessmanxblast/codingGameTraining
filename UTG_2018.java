@@ -44,7 +44,7 @@ class Board{
             copyBoard._spiders.add(spiderCopy);
         }
 
-        for (int i = 0; i < _myHeroes.size(); i++) {
+        for (int i = 0; i < _myHeroes.size(); i++) { 
             Entity heroCopy = _myHeroes.get(i).copyEntity();
             copyBoard._myHeroes.add(heroCopy);
         }
@@ -112,10 +112,10 @@ class Action{
         return result;
     }
 
-    public void sendOrder(Board iBoard){
-        for (int i = 0; i < iBoard._myHeroes.size(); i++) {
-            System.out.println("MOVE " + (iBoard._myHeroes.get(i)._x+_deltaX)+" " +(iBoard._myHeroes.get(i)._y+_deltaY));
-        }
+    public void sendOrder(Board iBoard,int iIndexHero){
+        //for (int i = 0; i < iBoard._myHeroes.size(); i++) {
+            System.out.println("MOVE " + (iBoard._myHeroes.get(iIndexHero)._x+_deltaX)+" " +(iBoard._myHeroes.get(iIndexHero)._y+_deltaY));
+        //}
     }
 }
 
@@ -127,8 +127,8 @@ class Utils{
     public static long G_NbIndividualsAnalysed = 0; //number of nodes analyzed
 
     // measure time since beginning of turn and return yes if more than X ms (X constant)
-    public static boolean mustAbort() {
-        if (System.currentTimeMillis()>counter_init+max_time_before_abort) return true; return false;
+    public static boolean mustAbort(int iIndexHero) {
+        if (System.currentTimeMillis()>counter_init+(max_time_before_abort/(2-iIndexHero))) return true; return false;
     }
 
     //distance between 2 points. maybe change the return type
@@ -146,10 +146,10 @@ class Utils{
 
 
     //anticipate 1 turn
-    public static void playOneTurn(Board iBoard, Action iAction){
+    public static void playOneTurn(Board iBoard, Action iAction,int iIndexHero){
         //move heroes, attach nearby spiders
-        for (int i = 0; i < iBoard._myHeroes.size(); i++){
-            Entity iHero = iBoard._myHeroes.get(i);
+        //for (int i = 0; i < iBoard._myHeroes.size(); i++){
+            Entity iHero = iBoard._myHeroes.get(iIndexHero);
             iHero._x += iAction._deltaX;
             iHero._y += iAction._deltaY;
             //check to see if any spider is within 800 from said hero, if so do 2 damage, gain 2 mana
@@ -161,7 +161,7 @@ class Utils{
                     iBoard._myMana +=2;
                 }
             }
-        }
+        //}
 
         for (int i = 0; i < iBoard._spiders.size(); i++) {
             Entity iSpider = iBoard._spiders.get(i);
@@ -239,18 +239,21 @@ class Individual {
     List<Action> genes;
     int geneLength;
     Board board;
+    int indexHero;
 
     Individual(){
         fitness = 0;
         genes=new ArrayList<Action>();
         geneLength = 3;
         Board board=new Board();
+        indexHero=10000;
     }
 
-    Individual(Board iBoard, int iIndexPopulatedIndividual) {
+    Individual(Board iBoard, int iIndexPopulatedIndividual,int iIndexHero) {
         fitness = 0;
         genes=new ArrayList<Action>();
         geneLength = 3;
+        indexHero = iIndexHero;
 
         //Set genes randomly for each individual
         board=iBoard.copyBoard();
@@ -261,7 +264,7 @@ class Individual {
             Action aRandomAction=Action.getRandomAction(board);
 
             genes.add(aRandomAction);
-            Utils.playOneTurn(board,genes.get(i));
+            Utils.playOneTurn(board,genes.get(i),indexHero);
             long eval=Utils.evalBoard(board);
 
             cumulatedFitness+=eval*Math.pow(2, i);
@@ -278,6 +281,7 @@ class Individual {
         Utils.G_NbIndividualsAnalysed++;
         result.fitness=fitness;
         result.geneLength=geneLength;
+        result.indexHero=indexHero;
         for (int i=0;i<geneLength;i++){
             result.genes.add(new Action(genes.get(i)));
         }
@@ -288,7 +292,7 @@ class Individual {
     void calcFitness() {
         long cumulatedFitness=0;
         for(int i=0;i<genes.size();i++){
-            Utils.playOneTurn(board,genes.get(i));
+            Utils.playOneTurn(board,genes.get(i),indexHero);
             cumulatedFitness+=Utils.evalBoard(board)*Math.pow(2, i);
         }
         fitness=cumulatedFitness;
@@ -320,10 +324,10 @@ class Population {
     }
 
     //Initialize population
-    void initializePopulation(Board iBoard) {
+    void initializePopulation(Board iBoard,int iIndexHero) {
         board=iBoard;
-        for (int i = 0; i < popSize && !Utils.mustAbort(); i++) {
-            individuals.add(new Individual(board,i));
+        for (int i = 0; i < popSize && !Utils.mustAbort(iIndexHero); i++) {
+            individuals.add(new Individual(board,i,iIndexHero));
             Utils.G_NbIndividualsAnalysed++;
         }
     }
@@ -382,11 +386,11 @@ class SimpleDemoGA {
     Individual secondFittest;
     int generationCount = 0;
 
-    static Action demo(Board iBoard) {
+    static Action demo(Board iBoard,int iIndexHero) {
         SimpleDemoGA demo = new SimpleDemoGA();
 
         //Initialize population
-        demo.population.initializePopulation(iBoard);
+        demo.population.initializePopulation(iBoard,iIndexHero);
 
         //Calculate fitness of each individual is already done within population init. this just initialize the fittest attribute of the pop object
         demo.population.getFittest();
@@ -394,7 +398,7 @@ class SimpleDemoGA {
         // cerr<<"Generation: " << demo.generationCount << " Fittest: " << demo.population.fittest<<endl;
 
         //While we have time
-        while (!Utils.mustAbort()) {
+        while (!Utils.mustAbort(iIndexHero)) {
             //        while (demo.generationCount<30) {
             ++demo.generationCount;
 
@@ -659,15 +663,18 @@ class Player {
             System.err.println("Eval1 is: "+ Utils.evalBoard(theBoard));
 
             Utils.G_NbIndividualsAnalysed=0;
-            Action theBestAction=SimpleDemoGA.demo(theBoard);
-            System.err.println("G_NbIndividualsAnalysed: "+Utils.G_NbIndividualsAnalysed);
+            Action theBestAction0=SimpleDemoGA.demo(theBoard,0);
+            System.err.println("G_NbIndividualsAnalysed 0: "+Utils.G_NbIndividualsAnalysed);
+            theBestAction0.sendOrder(theBoard,0);
 
-            theBestAction.sendOrder(theBoard);
-            System.err.println("Eval2 is: "+ Utils.evalBoard(theBoard));
+            Utils.G_NbIndividualsAnalysed=0;
+            Action theBestAction1=SimpleDemoGA.demo(theBoard,1);
+            System.err.println("G_NbIndividualsAnalysed 1: "+Utils.G_NbIndividualsAnalysed);
+            theBestAction1.sendOrder(theBoard,1);
 
-            System.err.println("Time is: "+ System.currentTimeMillis());
-            System.err.println("Must abort: "+Utils.mustAbort());
-            //Action theBestAction=SimpleDemoGA.demo(theBoard);
+            System.out.println("WAIT");
+
+                    //Action theBestAction=SimpleDemoGA.demo(theBoard);
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
@@ -685,9 +692,7 @@ class Player {
                 }
                 */
 
-                //System.err.println("Eval is: "+ Utils.evalBoard(theBoard));
-                // System.err.println("Time is: "+ System.currentTimeMillis());
-                // System.err.println("Must abort: "+Utils.mustAbort());
+
             }
         }
     }
