@@ -672,7 +672,14 @@ class Player {
             System.err.println("G_NbIndividualsAnalysed 1: "+Utils.G_NbIndividualsAnalysed);
             theBestAction1.sendOrder(theBoard,1);
 
-            System.out.println("WAIT");
+            // System.out.println("WAIT");
+
+            if (theBoard._myHeroes.get(2)._x<13387 || theBoard._myHeroes.get(2)._y<4757) {
+                System.out.println("MOVE "+enemyBase._x+" "+enemyBase._y);
+            } else {
+                System.out.println("SPELL WIND "+enemyBase._x+" "+enemyBase._y);
+            }
+
 
                     //Action theBestAction=SimpleDemoGA.demo(theBoard);
 
