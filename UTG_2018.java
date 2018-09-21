@@ -44,7 +44,7 @@ class Board{
             copyBoard._spiders.add(spiderCopy);
         }
 
-        for (int i = 0; i < _myHeroes.size(); i++) { 
+        for (int i = 0; i < _myHeroes.size(); i++) {
             Entity heroCopy = _myHeroes.get(i).copyEntity();
             copyBoard._myHeroes.add(heroCopy);
         }
@@ -114,7 +114,7 @@ class Action{
 
     public void sendOrder(Board iBoard,int iIndexHero){
         //for (int i = 0; i < iBoard._myHeroes.size(); i++) {
-            System.out.println("MOVE " + (iBoard._myHeroes.get(iIndexHero)._x+_deltaX)+" " +(iBoard._myHeroes.get(iIndexHero)._y+_deltaY));
+        System.out.println("MOVE " + (iBoard._myHeroes.get(iIndexHero)._x+_deltaX)+" " +(iBoard._myHeroes.get(iIndexHero)._y+_deltaY));
         //}
     }
 }
@@ -149,18 +149,18 @@ class Utils{
     public static void playOneTurn(Board iBoard, Action iAction,int iIndexHero){
         //move heroes, attach nearby spiders
         //for (int i = 0; i < iBoard._myHeroes.size(); i++){
-            Entity iHero = iBoard._myHeroes.get(iIndexHero);
-            iHero._x += iAction._deltaX;
-            iHero._y += iAction._deltaY;
-            //check to see if any spider is within 800 from said hero, if so do 2 damage, gain 2 mana
-            for (int j = 0; j < iBoard._spiders.size(); j++) {
-                Entity iSpider = iBoard._spiders.get(j);
-                double distanceFromHero = distance (iSpider, iHero);
-                if (distanceFromHero <=800){
-                    iSpider._health -= 2;
-                    iBoard._myMana +=2;
-                }
+        Entity iHero = iBoard._myHeroes.get(iIndexHero);
+        iHero._x += iAction._deltaX;
+        iHero._y += iAction._deltaY;
+        //check to see if any spider is within 800 from said hero, if so do 2 damage, gain 2 mana
+        for (int j = 0; j < iBoard._spiders.size(); j++) {
+            Entity iSpider = iBoard._spiders.get(j);
+            double distanceFromHero = distance (iSpider, iHero);
+            if (distanceFromHero <=800){
+                iSpider._health -= 2;
+                iBoard._myMana +=2;
             }
+        }
         //}
 
         for (int i = 0; i < iBoard._spiders.size(); i++) {
@@ -672,9 +672,32 @@ class Player {
             System.err.println("G_NbIndividualsAnalysed 1: "+Utils.G_NbIndividualsAnalysed);
             theBestAction1.sendOrder(theBoard,1);
 
-            System.out.println("WAIT");
+            // System.out.println("WAIT");
 
-                    //Action theBestAction=SimpleDemoGA.demo(theBoard);
+            if (Utils.distance(theBoard._myHeroes.get(2),enemyBase)>6000) {
+                System.out.println("MOVE "+enemyBase._x+" "+enemyBase._y);
+            }
+            else {
+                double mindistSpider=1000000000;
+                Entity closestSpider=new Entity();
+                boolean closestSpiderFound=false;
+                for (int i = 0; i < theBoard._spiders.size(); i++) {
+                    if (Utils.distance(theBoard._myHeroes.get(2),theBoard._spiders.get(i))<mindistSpider){
+                        mindistSpider=Utils.distance(theBoard._myHeroes.get(2),theBoard._spiders.get(i));
+                        closestSpiderFound=true;
+                        closestSpider=theBoard._spiders.get(i);
+                    }
+                }
+                if (mindistSpider>1280) {
+                    System.out.println("MOVE "+closestSpider._x+" "+closestSpider._y);
+                }
+                else {
+                    System.out.println("SPELL WIND "+enemyBase._x+" "+enemyBase._y);
+                }
+            }
+
+
+            //Action theBestAction=SimpleDemoGA.demo(theBoard);
 
             for (int i = 0; i < heroesPerPlayer; i++) {
 
