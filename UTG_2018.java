@@ -44,7 +44,7 @@ class Board{
             copyBoard._spiders.add(spiderCopy);
         }
 
-        for (int i = 0; i < _myHeroes.size(); i++) { 
+        for (int i = 0; i < _myHeroes.size(); i++) {
             Entity heroCopy = _myHeroes.get(i).copyEntity();
             copyBoard._myHeroes.add(heroCopy);
         }
@@ -674,7 +674,7 @@ class Player {
 
             // System.out.println("WAIT");
 
-            if (theBoard._myHeroes.get(2)._x<13387 || theBoard._myHeroes.get(2)._y<4757) {
+            if (Utils.distance(theBoard._myHeroes.get(2),enemyBase)>6000) {
                 System.out.println("MOVE "+enemyBase._x+" "+enemyBase._y);
             } else {
                 System.out.println("SPELL WIND "+enemyBase._x+" "+enemyBase._y);
