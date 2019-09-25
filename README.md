@@ -1,2 +1,2 @@
 # codingGameTraining
-Test push
+Testing push
