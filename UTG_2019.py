@@ -227,7 +227,7 @@ while True:
             currCell=currentGame.grid.cells[i]
             prevCell=previousGame.grid.cells[i]
             
-            if currCell.amadeusium!="?" and prevCell.amadeusium!="?" and currCell.amadeusium!=prevCell.amadeusium:
+            if (currCell.amadeusium!="?" and prevCell.amadeusium!="?" and currCell.amadeusium!=prevCell.amadeusium) or (currCell.hole!=prevCell.hole):
                 #was there an enemy robot near it?
                 for enemyRobot in previousGame.enemy_robots:
                     if enemyRobot.distance(prevCell)<=1:
