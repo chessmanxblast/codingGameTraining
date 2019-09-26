@@ -160,11 +160,31 @@ while True:
             game.radars.append(Entity(x, y, type, id))
 
     #game.grid.print()
+
+    for robot in range(5):
+        g_shortest_dist = 999999
+        g_curr_robot = game.my_robots[0]
+        g_curr_cell = game.grid.cells[0]
+        for i in range(len(game.my_robots)):
+            if game.my_robots[i].item == -1:
+                for cell in game.grid.cells:
+                    # print(cell.distance(game.my_robots[i]), file=sys.stderr)
+                    if cell.amadeusium != '?':
+                        if cell.distance(game.my_robots[i]) < g_shortest_dist and int(cell.amadeusium) > 0 and game.my_robots[i].action == "WAIT":
+                            g_shortest_dist = cell.distance(game.my_robots[i])
+                            g_curr_robot = game.my_robots[i]
+                            g_curr_cell = cell
+        if g_shortest_dist != 999999:
+            g_curr_robot.action = "DIG {} {}".format(g_curr_cell.x, g_curr_cell.y)
+            g_curr_cell.amadeusium = int(g_curr_cell.amadeusium) -1
+        print(g_curr_robot.action, file=sys.stderr)
+        print("shortest distance", g_shortest_dist, "robot #:", g_curr_robot.id, "robot_x", g_curr_robot.x, "robot_y", g_curr_robot.y, "cur_cell_x", g_curr_cell.x, "cur_cell_y", g_curr_cell.y, file=sys.stderr)
     
     #looks at how many radars have been placed, uses that to pull the location of the next radar from the list IDEALRADARLOCATIONS and create a position object NEXTRADARPOS
     NUMBEROFRADARS = len(game.radars)
-    NEXTRADARXY = IDEALRADARLOCATIONS[NUMBEROFRADARS]
-    NEXTRADARPOS = Pos(NEXTRADARXY[0],NEXTRADARXY[1])
+    if NUMBEROFRADARS < 6:
+        NEXTRADARXY = IDEALRADARLOCATIONS[NUMBEROFRADARS]
+        NEXTRADARPOS = Pos(NEXTRADARXY[0],NEXTRADARXY[1])
     print(NUMBEROFRADARS, file=sys.stderr)
     print(NEXTRADARPOS.x, file=sys.stderr)
     print(NEXTRADARPOS.y, file=sys.stderr)
@@ -189,12 +209,12 @@ while True:
             game.my_robots[i].action= "MOVE 0 "+ str(game.my_robots[i].y)
        
         # if radar will spawn within 2 turns, get guy
-        elif game.radar_cooldown < 2 and game.my_robots[i].item != RADAR:
+        elif game.radar_cooldown < 2 and game.my_robots[i].item != RADAR and game.my_robots[i].action  == 'WAIT':
             game.my_robots[i].action = f"REQUEST RADAR {i}"
         elif game.my_robots[i].item == RADAR:
             game.my_robots[i].action = f"DIG {NEXTRADARPOS.x} {NEXTRADARPOS.y} dropping radar {i}"
-        else:
-            game.my_robots[i].action = f"WAIT waiting for radar to refresh {i}"
+        # else:
+        #     game.my_robots[i].action = f"WAIT waiting for radar to refresh {i}"
     game.my_robots[0].doAction()
     game.my_robots[1].doAction()
     game.my_robots[2].doAction()
