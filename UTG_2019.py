@@ -159,6 +159,14 @@ while True:
 
         # WAIT|
         # MOVE x y|REQUEST item
-        game.my_robots[i].wait(f"Starter AI {i}")
+        if i == 1:
+            if game.radar_cooldown == 0 and game.my_robots[i].item != RADAR:
+                game.my_robots[i].request(RADAR)
+            elif game.my_robots[i].item == RADAR:
+                game.my_robots[i].dig(10,10)
+            else:
+                game.my_robots[i].wait(f" waiting for radar to refresh {i}")
+        else:
+            game.my_robots[i].wait(f"Starter AI {i}")
 
         
