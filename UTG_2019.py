@@ -37,10 +37,14 @@ class Robot(Entity):
     def __init__(self, x, y, type, id, item):
         super().__init__(x, y, type, id)
         self.item = item
+        self.action = "WAIT"
 
     def is_dead(self):
         return self.x == -1 and self.y == -1
-
+    
+    def doAction(self):
+        print(self.action)
+        
     @staticmethod
     def move(x, y, message=""):
         print(f"MOVE {x} {y} {message}")
@@ -164,15 +168,27 @@ while True:
     print(NEXTRADARPOS.x, file=sys.stderr)
     print(NEXTRADARPOS.y, file=sys.stderr)
 
+    #game.my_robots[2].item=AMADEUSIUM
+    
     for i in range(len(game.my_robots)):
         # Write an action using print
         # To debug: print("Debug messages...", file=sys.stderr)
 
         # WAIT|
         # MOVE x y|REQUEST item
+
+       
+        #game.my_robots[i].wait(f"Starter AI {i}")
+
+        #game.my_robots[i].action="MOVE 3 7"
         
+        
+        #bring back ore if it has some
+        if game.my_robots[i].item==AMADEUSIUM:
+            game.my_robots[i].action="MOVE 0 "+str(game.my_robots[i].y)
+       
         # if radar will spawn within 2 turns, get guy
-        if game.radar_cooldown < 2 and game.my_robots[i].item != RADAR:
+        elif game.radar_cooldown < 2 and game.my_robots[i].item != RADAR:
             game.my_robots[i].action = ("REQUEST RADAR {i}")
         elif game.my_robots[i].item == RADAR:
             game.my_robots[i].action = "DIG {NEXTRADARPOS.x},{NEXTRADARPOS.y} dropping radar {i}"
@@ -184,6 +200,3 @@ while True:
     game.my_robots[3].doAction
     game.my_robots[4].doAction
 
-
-
-        
