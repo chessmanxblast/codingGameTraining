@@ -75,6 +75,7 @@ class Cell(Pos):
         self.hole = hole
 
 
+
 class Grid:
     def __init__(self):
         self.cells = []
@@ -87,6 +88,12 @@ class Grid:
             return self.cells[x + width * y]
         return None
 
+    def print(self):
+        for y in range(15):
+            line=""
+            for x in range(30):
+                line+=self.get_cell(x, y).amadeusium
+            print(line, file=sys.stderr)
 
 class Game:
     def __init__(self):
@@ -144,6 +151,8 @@ while True:
         elif type == RADAR:
             game.radars.append(Entity(x, y, type, id))
 
+    game.grid.print()
+
     for i in range(len(game.my_robots)):
         # Write an action using print
         # To debug: print("Debug messages...", file=sys.stderr)
@@ -151,3 +160,5 @@ while True:
         # WAIT|
         # MOVE x y|REQUEST item
         game.my_robots[i].wait(f"Starter AI {i}")
+
+        
