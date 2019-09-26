@@ -39,10 +39,10 @@ class Robot(Entity):
 
     def is_dead(self):
         return self.x == -1 and self.y == -1
-    
+
     def doAction(self):
         print(self.action)
-        
+
     @staticmethod
     def move(x, y, message=""):
         print(f"MOVE {x} {y} {message}")
@@ -168,3 +168,4 @@ while True:
         #game.my_robots[i].action="MOVE 3 7"
         game.my_robots[i].doAction()
 
+        
