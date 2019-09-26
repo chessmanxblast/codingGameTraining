@@ -15,7 +15,7 @@ HOLE = 1
 RADAR = 2
 TRAP = 3
 AMADEUSIUM = 4
-IDEALRADARLOCATIONS = [[5,7],[11,4],[12,11],[17,7],[23,4],[24,11],[29,7]]
+IDEALRADARLOCATIONS = [[11,4],[12,11],[17,7],[23,4],[24,11],[29,7]]
 
 
 
@@ -164,6 +164,14 @@ while True:
             game.radars.append(Entity(x, y, type, id))
 
     #game.grid.print()
+
+    # mark the cells with "-111" so that we don't blow up our own robots
+    for trap in game.traps:
+        for cell in game.grid.cells:
+            if cell.x == trap.x and cell.y == trap.y:
+                dangerGrid.get_cell(cell.x,cell.y).danger = True
+
+
     
     currentGame=copy.deepcopy(game)
     
@@ -172,19 +180,26 @@ while True:
         g_curr_robot = game.my_robots[0]
         g_curr_cell = game.grid.cells[0]
         for i in range(len(game.my_robots)):
-            if game.my_robots[i].item == -1:
+            if game.my_robots[i].item == -1 or game.my_robots[i].item == TRAP:
                 for cell in game.grid.cells:
                     # print(cell.distance(game.my_robots[i]), file=sys.stderr)
+
                     if cell.amadeusium != '?' and dangerGrid.get_cell(cell.x,cell.y).danger==False:
                         if cell.distance(game.my_robots[i]) < g_shortest_dist and int(cell.amadeusium) > 0 and game.my_robots[i].action == "WAIT":
                             g_shortest_dist = cell.distance(game.my_robots[i])
                             g_curr_robot = game.my_robots[i]
                             g_curr_cell = cell
         if g_shortest_dist != 999999:
+            print("inside 99999 if", file=sys.stderr)
             g_curr_robot.action = "DIG {} {}".format(g_curr_cell.x, g_curr_cell.y)
             g_curr_cell.amadeusium = int(g_curr_cell.amadeusium) -1
-        #print(g_curr_robot.action, file=sys.stderr)
-        #print("shortest distance", g_shortest_dist, "robot #:", g_curr_robot.id, "robot_x", g_curr_robot.x, "robot_y", g_curr_robot.y, "cur_cell_x", g_curr_cell.x, "cur_cell_y", g_curr_cell.y, file=sys.stderr)
+
+            if g_curr_cell.amadeusium > 0 and g_curr_robot.x == 0 and game.radar_cooldown == 0 and g_curr_robot.item != TRAP:
+                print("inside trap if", file=sys.stderr)
+                g_curr_robot.action = f"REQUEST TRAP"
+        print(g_curr_robot.action, file=sys.stderr)
+        print("shortest distance", g_shortest_dist, "robot #:", g_curr_robot.id, "robot_x", g_curr_robot.x, "robot_y", g_curr_robot.y, "cur_cell_x", g_curr_cell.x, "cur_cell_y", g_curr_cell.y, file=sys.stderr)
+
     
     #looks at how many radars have been placed, uses that to pull the location of the next radar from the list IDEALRADARLOCATIONS and create a position object NEXTRADARPOS
     NUMBEROFRADARS = len(game.radars)
@@ -215,7 +230,7 @@ while True:
             game.my_robots[i].action= "MOVE 0 "+ str(game.my_robots[i].y)
        
         # if radar will spawn within 2 turns, get guy
-        elif game.radar_cooldown < 2 and game.my_robots[i].item != RADAR and game.my_robots[i].action  == 'WAIT':
+        elif game.radar_cooldown < 2 and game.my_robots[i].item != RADAR and game.my_robots[i].item != TRAP and (game.my_robots[i].action  == 'WAIT'): # or game.my_robots[i].action == 'REQUEST TRAP'):
             game.my_robots[i].action = f"REQUEST RADAR {i}"
         elif game.my_robots[i].item == RADAR:
             game.my_robots[i].action = f"DIG {NEXTRADARPOS.x} {NEXTRADARPOS.y} dropping radar {i}"
