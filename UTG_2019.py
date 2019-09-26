@@ -13,6 +13,8 @@ HOLE = 1
 RADAR = 2
 TRAP = 3
 AMADEUSIUM = 4
+IDEALRADARLOCATIONS = [[5,7],[11,4],[12,11],[17,7],[23,4],[24,11],[29,7]]
+
 
 
 class Pos:
@@ -138,6 +140,7 @@ while True:
     entity_count, game.radar_cooldown, game.trap_cooldown = [int(i) for i in input().split()]
 
     game.reset()
+    
 
     for i in range(entity_count):
         # id: unique id of the entity
@@ -155,7 +158,15 @@ while True:
         elif type == RADAR:
             game.radars.append(Entity(x, y, type, id))
 
-    game.grid.print()
+    #game.grid.print()
+    
+    #looks at how many radars have been placed, uses that to pull the location of the next radar from the list IDEALRADARLOCATIONS and create a position object NEXTRADARPOS
+    NUMBEROFRADARS = len(game.radars)
+    NEXTRADARXY = IDEALRADARLOCATIONS[NUMBEROFRADARS]
+    NEXTRADARPOS = Pos(NEXTRADARXY[0],NEXTRADARXY[1])
+    print(NUMBEROFRADARS, file=sys.stderr)
+    print(NEXTRADARPOS.x, file=sys.stderr)
+    print(NEXTRADARPOS.y, file=sys.stderr)
 
     #game.my_robots[2].item=AMADEUSIUM
     
@@ -165,6 +176,8 @@ while True:
 
         # WAIT|
         # MOVE x y|REQUEST item
+
+       
         #game.my_robots[i].wait(f"Starter AI {i}")
 
         #game.my_robots[i].action="MOVE 3 7"
@@ -173,7 +186,17 @@ while True:
         #bring back ore if it has some
         if game.my_robots[i].item==AMADEUSIUM:
             game.my_robots[i].action="MOVE 0 "+str(game.my_robots[i].y)
-        
-        
-        game.my_robots[i].doAction()
+       
+        # if radar will spawn within 2 turns, get guy
+        elif game.radar_cooldown < 2 and game.my_robots[i].item != RADAR:
+            game.my_robots[i].action = ("REQUEST RADAR {i}")
+        elif game.my_robots[i].item == RADAR:
+            game.my_robots[i].action = "DIG {NEXTRADARPOS.x},{NEXTRADARPOS.y} dropping radar {i}"
+        else:
+            game.my_robots[i].action = "WAIT waiting for radar to refresh {i}"
+    game.my_robots[0].doAction
+    game.my_robots[1].doAction
+    game.my_robots[2].doAction
+    game.my_robots[3].doAction
+    game.my_robots[4].doAction
 
