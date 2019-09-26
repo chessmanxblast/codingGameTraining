@@ -35,10 +35,14 @@ class Robot(Entity):
     def __init__(self, x, y, type, id, item):
         super().__init__(x, y, type, id)
         self.item = item
+        self.action = "WAIT"
 
     def is_dead(self):
         return self.x == -1 and self.y == -1
-
+    
+    def doAction(self):
+        print(self.action)
+        
     @staticmethod
     def move(x, y, message=""):
         print(f"MOVE {x} {y} {message}")
@@ -159,6 +163,8 @@ while True:
 
         # WAIT|
         # MOVE x y|REQUEST item
-        game.my_robots[i].wait(f"Starter AI {i}")
+        #game.my_robots[i].wait(f"Starter AI {i}")
 
-        
+        #game.my_robots[i].action="MOVE 3 7"
+        game.my_robots[i].doAction()
+
