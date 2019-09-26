@@ -39,10 +39,10 @@ class Robot(Entity):
 
     def is_dead(self):
         return self.x == -1 and self.y == -1
-
+    
     def doAction(self):
         print(self.action)
-
+        
     @staticmethod
     def move(x, y, message=""):
         print(f"MOVE {x} {y} {message}")
@@ -157,6 +157,8 @@ while True:
 
     game.grid.print()
 
+    #game.my_robots[2].item=AMADEUSIUM
+    
     for i in range(len(game.my_robots)):
         # Write an action using print
         # To debug: print("Debug messages...", file=sys.stderr)
@@ -166,6 +168,12 @@ while True:
         #game.my_robots[i].wait(f"Starter AI {i}")
 
         #game.my_robots[i].action="MOVE 3 7"
+        
+        
+        #bring back ore if it has some
+        if game.my_robots[i].item==AMADEUSIUM:
+            game.my_robots[i].action="MOVE 0 "+str(game.my_robots[i].y)
+        
+        
         game.my_robots[i].doAction()
 
-        
