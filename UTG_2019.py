@@ -101,6 +101,7 @@ class Cell(Pos):
         self.amadeusium = amadeusium
         self.hole = hole
         self.danger=False
+        self.radar=False
 
     def has_hole(self):
         return self.hole == HOLE
@@ -208,7 +209,50 @@ while True:
         NEXTRADARPOS = Pos(IDEALRADARLOCATIONS[NUMBEROFRADARS].x,IDEALRADARLOCATIONS[NUMBEROFRADARS].y)
         if dangerGrid.get_cell(NEXTRADARPOS.x,NEXTRADARPOS.y).danger == True:
             NEXTRADARPOS.changeXYtoAdjacentNonDanger(dangerGrid)
-            
+
+    #record changes done by enemy
+    if nbTurn>1:
+        #guess enemy traps
+        for i in range(len(game.grid.cells)):
+            currCell=currentGame.grid.cells[i]
+            prevCell=previousGame.grid.cells[i]
+
+            if (currCell.amadeusium!="?" and prevCell.amadeusium!="?" and currCell.amadeusium!=prevCell.amadeusium) or (currCell.hole!=prevCell.hole):
+                #was there an enemy robot near it?
+                for enemyRobot in previousGame.enemy_robots:
+                    if enemyRobot.distance(prevCell)<=1:
+                        #print(f"cell {currCell.x} {currCell.y} got possibly dug by an enemy", file=sys.stderr)
+                        dangerGrid.cells[i].danger=True;
+        #guess enemy radars
+        for i in range(len(game.grid.cells)):
+            currCell=currentGame.grid.cells[i]
+            prevCell=previousGame.grid.cells[i]
+            if currCell.hole!=prevCell.hole:
+                #was there an enemy robot near it?
+                for enemyRobot in previousGame.enemy_robots:
+                    if enemyRobot.distance(prevCell)<=1:
+                        #let's assume it is a radar if there is no other enemy hole within range
+                        isPotentiallyARadar=True
+                        for j in range(len(game.grid.cells)):
+                            if dangerGrid.cells[j].danger==True and currCell.distance(dangerGrid.cells[j])<=4 and currCell.distance(dangerGrid.cells[j])>0:
+                                isPotentiallyARadar=False
+                        if isPotentiallyARadar:
+                            enemyRadarGrid.cells[i].radar=True
+        for cell in enemyRadarGrid.cells:
+            if (cell.radar==True):
+                print(f"radar enemy at {cell.x} {cell.y}", file=sys.stderr)
+                g_shortest_dist = 999999
+                g_curr_robot = game.my_robots[0]
+                for i in range(len(game.my_robots)):
+                    if game.my_robots[i].item == -1:
+                        if cell.distance(game.my_robots[i]) < g_shortest_dist and game.my_robots[i].action == "WAIT":
+                            g_shortest_dist = cell.distance(game.my_robots[i])
+                            g_curr_robot = game.my_robots[i]
+                if g_shortest_dist != 999999:
+                    g_curr_robot.action = "DIG {} {}".format(cell.x, cell.y)
+                    if g_shortest_dist<=1:
+                        #radar will be dug this turn
+                        cell.radar=False
     #calculate closest ore to mine for each robot, if there is a multi-ore and a trap is ready, grab it to place on the multiore
     for robot in range(5):
         g_shortest_dist = 999999
@@ -264,37 +308,6 @@ while True:
             # else:
             #     game.my_robots[i].action = f"WAIT waiting for radar to refresh {i}"
             
-            for i in range(len(game.grid.cells)):
-                currCell=currentGame.grid.cells[i]
-                prevCell=previousGame.grid.cells[i]
-                
-                if (currCell.amadeusium!="?" and prevCell.amadeusium!="?" and currCell.amadeusium!=prevCell.amadeusium) or (currCell.hole!=prevCell.hole):
-                    #was there an enemy robot near it?
-                    for enemyRobot in previousGame.enemy_robots:
-                        if enemyRobot.distance(prevCell)<=1:
-                            print(f"cell {currCell.x} {currCell.y} got possibly dug by an enemy", file=sys.stderr)
-                            dangerGrid.cells[i].danger=True;
-							
-    #record changed done by enemy
-    if nbTurn>1:
-        for i in range(len(game.grid.cells)):
-            currCell=currentGame.grid.cells[i]
-            prevCell=previousGame.grid.cells[i]
-            
-            #guess enemy traps
-            if (currCell.amadeusium!="?" and prevCell.amadeusium!="?" and currCell.amadeusium!=prevCell.amadeusium) or (currCell.hole!=prevCell.hole):
-                #was there an enemy robot near it?
-                for enemyRobot in previousGame.enemy_robots:
-                    if enemyRobot.distance(prevCell)<=1:
-                        print(f"cell {currCell.x} {currCell.y} got possibly dug by an enemy", file=sys.stderr)
-                        dangerGrid.cells[i].danger=True;
-            
-            #guess enemy radars
-            #if currCell.hole!=prevCell.hole:
-            #    #was there an enemy robot near it?
-            #    for enemyRobot in previousGame.enemy_robots:
-            #        if enemyRobot.distance(prevCell)<=1:
-            #            dangerGrid.cells[i].danger=True;
     
 	#if a radar is almost ready, the robot closest to the efficient point at the base should grab it
     if game.radar_cooldown < 2:
