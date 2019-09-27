@@ -152,6 +152,7 @@ class Game:
 game = Game()
 nbTurn=0;
 dangerGrid=Grid()
+enemyRadarGrid=Grid()
 # game loop
 while True:
     nbTurn=nbTurn+1
@@ -233,7 +234,10 @@ while True:
                 g_curr_robot.action = f"REQUEST TRAP"
         print(g_curr_robot.action, file=sys.stderr)
         print("shortest distance", g_shortest_dist, "robot #:", g_curr_robot.id, "robot_x", g_curr_robot.x, "robot_y", g_curr_robot.y, "cur_cell_x", g_curr_cell.x, "cur_cell_y", g_curr_cell.y, file=sys.stderr)
+    
 
+    
+		
     if nbTurn > 1:
         for i in range(len(game.my_robots)):
             # Write an action using print
@@ -244,6 +248,7 @@ while True:
 
            
             #game.my_robots[i].wait(f"Starter AI {i}")
+
 
             #game.my_robots[i].action="MOVE 3 7"
             
@@ -269,9 +274,29 @@ while True:
                         if enemyRobot.distance(prevCell)<=1:
                             print(f"cell {currCell.x} {currCell.y} got possibly dug by an enemy", file=sys.stderr)
                             dangerGrid.cells[i].danger=True;
+							
+    #record changed done by enemy
+    if nbTurn>1:
+        for i in range(len(game.grid.cells)):
+            currCell=currentGame.grid.cells[i]
+            prevCell=previousGame.grid.cells[i]
+            
+            #guess enemy traps
+            if (currCell.amadeusium!="?" and prevCell.amadeusium!="?" and currCell.amadeusium!=prevCell.amadeusium) or (currCell.hole!=prevCell.hole):
+                #was there an enemy robot near it?
+                for enemyRobot in previousGame.enemy_robots:
+                    if enemyRobot.distance(prevCell)<=1:
+                        print(f"cell {currCell.x} {currCell.y} got possibly dug by an enemy", file=sys.stderr)
+                        dangerGrid.cells[i].danger=True;
+            
+            #guess enemy radars
+            #if currCell.hole!=prevCell.hole:
+            #    #was there an enemy robot near it?
+            #    for enemyRobot in previousGame.enemy_robots:
+            #        if enemyRobot.distance(prevCell)<=1:
+            #            dangerGrid.cells[i].danger=True;
     
-    #if a radar is almost ready, the robot closest to the efficient point at the base should grab it
-    
+	#if a radar is almost ready, the robot closest to the efficient point at the base should grab it
     if game.radar_cooldown < 2:
         shortestDistanceToRadarHQPoint = 999
         for j in range(5):
@@ -280,7 +305,25 @@ while True:
                 shortestDistanceToRadarHQPoint = robotdistanceToRadarHQPoint 
                 closestRobotToRadarHQPoint = j
         game.my_robots[closestRobotToRadarHQPoint].action = f"REQUEST RADAR {j}"
-    previousGame=copy.deepcopy(currentGame)
+		
+
+	#disrupt people doing a wall
+    #first turn, let the free robot closest to center get a trap
+    if nbTurn==1:
+        distToCenter=99
+        robotTakingTrap=game.my_robots[0]
+        for i in range(len(game.my_robots)):
+            if game.my_robots[i].action=="WAIT" and game.my_robots[i].distance(game.grid.get_cell(0,7))<distToCenter:
+                distToCenter=game.my_robots[i].distance(game.grid.get_cell(0,7))
+                robotTakingTrap=game.my_robots[i]
+        robotTakingTrap.action="REQUEST TRAP"
+    #second turn, all free robots dig to their right
+    if nbTurn==2:
+        for i in range(len(game.my_robots)):
+            if game.my_robots[i].action=="WAIT":
+                game.my_robots[i].action=f"DIG 1 {game.my_robots[i].y}"
+    
+    previousGame=copy.deepcopy(currentGame)	
         
             
     game.my_robots[0].doAction()
