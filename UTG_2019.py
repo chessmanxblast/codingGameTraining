@@ -126,6 +126,7 @@ class Game:
 game = Game()
 nbTurn=0;
 dangerGrid=Grid()
+enemyRadarGrid=Grid()
 # game loop
 while True:
     nbTurn=nbTurn+1
@@ -237,17 +238,42 @@ while True:
         # else:
         #     game.my_robots[i].action = f"WAIT waiting for radar to refresh {i}"
         
+    #disrupt people doing a wall
+    #first turn, let the free robot closest to center get a trap
+    if nbTurn==1:
+        distToCenter=99
+        robotTakingTrap=game.my_robots[0]
+        for i in range(len(game.my_robots)):
+            if game.my_robots[i].action=="WAIT" and game.my_robots[i].distance(game.grid.get_cell(0,7))<distToCenter:
+                distToCenter=game.my_robots[i].distance(game.grid.get_cell(0,7))
+                robotTakingTrap=game.my_robots[i]
+        robotTakingTrap.action="REQUEST TRAP"
+    #second turn, all free robots dig to their right
+    if nbTurn==2:
+        for i in range(len(game.my_robots)):
+            if game.my_robots[i].action=="WAIT":
+                game.my_robots[i].action=f"DIG 1 {game.my_robots[i].y}"
+    
+    #record changed done by enemy
     if nbTurn>1:
         for i in range(len(game.grid.cells)):
             currCell=currentGame.grid.cells[i]
             prevCell=previousGame.grid.cells[i]
             
+            #guess enemy traps
             if (currCell.amadeusium!="?" and prevCell.amadeusium!="?" and currCell.amadeusium!=prevCell.amadeusium) or (currCell.hole!=prevCell.hole):
                 #was there an enemy robot near it?
                 for enemyRobot in previousGame.enemy_robots:
                     if enemyRobot.distance(prevCell)<=1:
                         print(f"cell {currCell.x} {currCell.y} got possibly dug by an enemy", file=sys.stderr)
                         dangerGrid.cells[i].danger=True;
+            
+            #guess enemy radars
+            #if currCell.hole!=prevCell.hole:
+            #    #was there an enemy robot near it?
+            #    for enemyRobot in previousGame.enemy_robots:
+            #        if enemyRobot.distance(prevCell)<=1:
+            #            dangerGrid.cells[i].danger=True;
     previousGame=copy.deepcopy(currentGame)
     
         
